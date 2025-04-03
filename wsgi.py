@@ -1,6 +1,7 @@
 # wsgi.py
 from app import app, db
-from models import *  # Import all models to register them with SQLAlchemy
+# Explicitly import ALL models
+from models import User, Project, CostEstimation, EstimationEntry, MiscEquipmentEstimation, MiscEquipmentEntry, LaborCostEstimation, LaborCostEntry, ProjectSummary  # [all your models]
 
 # This ensures models are loaded before CLI commands
 @app.cli.command("init-db")

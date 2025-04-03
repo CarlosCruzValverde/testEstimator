@@ -1,9 +1,19 @@
 #!/bin/bash
+# Initialize if needed
+if [ ! -d "migrations" ]; then
+    flask db init
+fi
 
-# Run migrations
-echo "Running database migrations..."
+# Create fresh migration (safely)
+if [ ! -f "migrations/versions/*_initial_tables.py" ]; then
+    flask db migrate -m "initial tables"
+fi
+
+# Apply migrations
 flask db upgrade
 
-# Start Gunicorn with your config
-echo "Starting Gunicorn..."
+# Fallback: Create tables directly if migrations failed
+flask init-db
+
+# Start app
 gunicorn -c gunicorn_config.py wsgi:app
