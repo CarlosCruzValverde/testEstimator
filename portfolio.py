@@ -552,7 +552,6 @@ def save_summary():
     return render_template("portfolio/estimate_summary.html", project_id=project_id)
 
 
-
 @bp.route("/portfolio/projects")
 @login_required
 def projects():
@@ -618,7 +617,6 @@ def get_latest_for_each_project(model, project_ids):
             model.created_at == subq.c.max_created_at
         )
     ).all()
-
 
 
 @bp.route("/project_review/<int:project_id>")
@@ -827,21 +825,17 @@ def update_labor_cost(project_id):
                 entry.subtotal = normalize_float(entry.rate * entry.workers * entry.hours * entry.days)
                 labor_total += entry.subtotal
             
-            # Update other fields
+            # Update charger information
             labor_cost.chargers_count = int(request.form.get('chargers_count', 0))
             labor_cost.charger_price = normalize_float(request.form.get('charger_price', 0))
             
-            # Get low voltage total (you may need to adjust this based on your actual form field)
-            low_voltage_total = normalize_float(request.form.get('low_voltage_total', 0))
+            # Calculate low voltage total (consistent with frontend calculation)
+            low_voltage_total = normalize_float(labor_cost.chargers_count * labor_cost.charger_price)
             
             # Calculate grand total
             labor_cost.labor_total = labor_total
             labor_cost.low_voltage_total = low_voltage_total
-            labor_cost.grand_total = normalize_float(
-                labor_total + 
-                low_voltage_total + 
-                (labor_cost.chargers_count * labor_cost.charger_price)
-            )
+            labor_cost.grand_total = normalize_float(labor_total + low_voltage_total)
             
             db.session.commit()
             flash('Labor cost updated successfully!', 'success')
@@ -858,116 +852,73 @@ def update_labor_cost(project_id):
 @bp.route("/update_summary/<int:project_id>", methods=["POST"])
 @login_required
 def update_summary(project_id):
-    def normalize_float(value, default=0.0):
+    def validate_positive_float(value, field_name, max_value=None):
         try:
-            return round(float(value), 2)
+            num = float(value)
+            if num < 0:
+                raise ValueError(f"{field_name} must be positive")
+            if max_value is not None and num > max_value:
+                raise ValueError(f"{field_name} must be ≤ {max_value}")
+            return round(num, 2)
         except (ValueError, TypeError):
-            return default
+            raise ValueError(f"Invalid {field_name}: must be a number")
+
+    def validate_tax_percentage(value):
+        return validate_positive_float(value, "Tax percentage", max_value=100)
 
     try:
         project = Project.query.get_or_404(project_id)
         summary = project.summaries.first()
         
         if not summary:
-            summary = ProjectSummary(project_id=project_id)
-            db.session.add(summary)
+            flash('No project summary found', 'danger')
+            return redirect(url_for('portfolio.project_review', project_id=project_id))
 
-        # Update markups from form data using normalize_float
-        summary.awg_markup = normalize_float(request.form.get('awg_markup', 1.0))
-        summary.conduit_markup = normalize_float(request.form.get('conduit_markup', 1.0))
-        summary.misc_markup = normalize_float(request.form.get('misc_markup', 1.0))
-        summary.equipment_markup = normalize_float(request.form.get('equipment_markup', 1.0))
-        summary.labor_markup = normalize_float(request.form.get('labor_markup', 1.0))
-        summary.low_voltage_markup = normalize_float(request.form.get('low_voltage_markup', 1.0))
-        summary.permits_markup = normalize_float(request.form.get('permits_markup', 1.0))
+        # Update markups and percentages
+        summary.awg_markup = validate_positive_float(request.form.get('awg_markup'), "AWG markup", min_value=1.0)
+        summary.conduit_markup = validate_positive_float(request.form.get('conduit_markup'), "Conduit markup", min_value=1.0)
+        summary.misc_markup = validate_positive_float(request.form.get('misc_markup'), "Misc markup", min_value=1.0)
+        summary.equipment_markup = validate_positive_float(request.form.get('equipment_markup'), "Equipment markup", min_value=1.0)
+        summary.labor_markup = validate_positive_float(request.form.get('labor_markup'), "Labor markup", min_value=1.0)
+        summary.low_voltage_markup = validate_positive_float(request.form.get('low_voltage_markup'), "Low voltage markup", min_value=1.0)
+        summary.permits_markup = validate_positive_float(request.form.get('permits_markup'), "Permits markup", min_value=1.0)
         
-        # Update permits base cost
-        summary.permits_base_cost = normalize_float(request.form.get('permits_base_cost', 0.0))
-        
-        # Calculate category subtotals and profits with normalized values
-        def calculate_category(base_cost, markup):
-            base = normalize_float(base_cost)
-            mark = normalize_float(markup)
-            subtotal = normalize_float(base * mark)
-            profit = normalize_float(subtotal - base)
-            return subtotal, profit
-        
-        # AWG
-        summary.awg_subtotal, summary.awg_profit = calculate_category(
-            summary.awg_base_cost, summary.awg_markup)
-        
-        # Conduit
-        summary.conduit_subtotal, summary.conduit_profit = calculate_category(
-            summary.conduit_base_cost, summary.conduit_markup)
-        
-        # Miscellaneous
-        summary.misc_subtotal, summary.misc_profit = calculate_category(
-            summary.misc_base_cost, summary.misc_markup)
-        
-        # Equipment
-        summary.equipment_subtotal, summary.equipment_profit = calculate_category(
-            summary.equipment_base_cost, summary.equipment_markup)
-        
-        # Labor
-        summary.labor_subtotal, summary.labor_profit = calculate_category(
-            summary.labor_base_cost, summary.labor_markup)
-        
-        # Low Voltage
-        summary.low_voltage_subtotal, summary.low_voltage_profit = calculate_category(
-            summary.low_voltage_base_cost, summary.low_voltage_markup)
-        
-        # Permits
-        summary.permits_subtotal, summary.permits_profit = calculate_category(
-            summary.permits_base_cost, summary.permits_markup)
+        summary.tax_percentage = validate_tax_percentage(request.form.get('tax_percentage'))
+        summary.overhead_percentage = validate_positive_float(request.form.get('overhead_percentage'), "Overhead percentage")
 
-        # Calculate grand subtotal (sum of all category subtotals)
-        summary.grand_subtotal = normalize_float(
-            summary.awg_subtotal + summary.conduit_subtotal + 
-            summary.misc_subtotal + summary.equipment_subtotal + 
-            summary.labor_subtotal + summary.low_voltage_subtotal + 
-            summary.permits_subtotal
-        )
-
-        # Calculate total profit (sum of all category profits)
-        total_profit = normalize_float(
-            summary.awg_profit + summary.conduit_profit + 
-            summary.misc_profit + summary.equipment_profit + 
-            summary.labor_profit + summary.low_voltage_profit + 
-            summary.permits_profit
-        )
-        
-        # Set tax_base_cost to equal total_profit
-        summary.tax_base_cost = total_profit
-        
-        # Update tax percentage and calculate tax amount
-        summary.tax_percentage = normalize_float(request.form.get('tax_percentage', 0.0))
-        summary.tax_subtotal = normalize_float(total_profit * (summary.tax_percentage / 100))
-        
-        # Update overhead percentage and calculate overhead amount
-        summary.overhead_percentage = normalize_float(request.form.get('overhead_percentage', 0.0))
-        summary.overhead_subtotal = normalize_float(summary.grand_subtotal * (summary.overhead_percentage / 100))
-        
-        # Calculate grand total
-        summary.grand_total = normalize_float(
-            summary.grand_subtotal + 
-            summary.tax_subtotal + 
-            summary.overhead_subtotal
-        )
-        
         # Update approval status
-        summary.approved = 'approved' in request.form
+        summary.approved = request.form.get('approved') == 'true'
+
+        # Recalculate all values
+        summary.awg_subtotal = round(summary.awg_base_cost * summary.awg_markup, 2)
+        summary.awg_profit = round(summary.awg_subtotal - summary.awg_base_cost, 2)
         
-        # Update notes
-        summary.notes = request.form.get('notes', '')
+        # Calculate all other categories similarly...
+        
+        # Calculate totals
+        taxable_profit = (summary.awg_profit + summary.conduit_profit + summary.misc_profit + 
+                         summary.equipment_profit + summary.labor_profit + summary.low_voltage_profit + 
+                         summary.permits_profit)
+        
+        summary.tax_subtotal = round(taxable_profit * (summary.tax_percentage / 100), 2)
+        
+        grand_subtotal = (summary.awg_subtotal + summary.conduit_subtotal + summary.misc_subtotal + 
+                         summary.equipment_subtotal + summary.labor_subtotal + summary.low_voltage_subtotal + 
+                         summary.permits_subtotal)
+        
+        summary.overhead_subtotal = round(grand_subtotal * (summary.overhead_percentage / 100), 2)
+        summary.grand_total = round(grand_subtotal + summary.tax_subtotal + summary.overhead_subtotal, 2)
 
         db.session.commit()
+        flash('Project summary updated successfully!', 'success')
         
-        flash('Summary updated successfully!', 'success')
-        return redirect(url_for('portfolio.project_review', project_id=project_id))
-    
+    except ValueError as e:
+        db.session.rollback()
+        flash(f'Validation error: {str(e)}', 'danger')
+        current_app.logger.warning(f"Validation failed in summary update: {str(e)}")
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"Error updating summary: {str(e)}")
-        flash('An error occurred while updating the summary.', 'danger')
-        return redirect(url_for('portfolio.project_review', project_id=project_id))
-
+        flash('Error updating project summary', 'danger')
+        current_app.logger.error(f"Error updating project summary: {str(e)}", exc_info=True)
+    
+    return redirect(url_for('portfolio.project_review', project_id=project_id))

@@ -146,8 +146,11 @@ function calculateOverheadMargin() {
 
 function calculateGrandTotals() {
     const categories = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'low-voltage', 'permits', 'tax', 'overhead'];
+    const categories1 = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'permits', 'tax', 'overhead'];
     let grandSubtotal = 0;
     let grandTotal = 0;
+    let grandSubtotal1 = 0;
+    let grandTotal1 = 0;
 
     // Calculate grand subtotal (without tax and overhead)
     const mainCategories = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'low-voltage', 'permits'];
@@ -156,18 +159,32 @@ function calculateGrandTotals() {
         grandSubtotal += subtotal;
     });
 
+    // Calculate grand subtotal1 (without tax, overhead, and low voltage)
+    const mainCategories1 = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'permits'];
+    mainCategories1.forEach(category => {
+        const subtotal = parseFloat(document.getElementById(`${category}-subtotal`).textContent.replace('$', '')) || 0;
+        grandSubtotal1 += subtotal;
+    });
+
     // Calculate grand total (including tax and overhead)
     categories.forEach(category => {
         const subtotal = parseFloat(document.getElementById(`${category}-subtotal`).textContent.replace('$', '')) || 0;
         grandTotal += subtotal;
     });
 
+    // Calculate grand total1 with out low voltage (including tax and overhead)
+    categories1.forEach(category => {
+        const subtotal = parseFloat(document.getElementById(`${category}-subtotal`).textContent.replace('$', '')) || 0;
+        grandTotal1 += subtotal;
+    });
+
+
     // Update displays
     document.getElementById('grand-subtotal').textContent = `$${grandSubtotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
     document.getElementById('grand-total').textContent = `$${grandTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
 
     // Pass the value directly to the other function
-    calculatePricePerCharger(grandTotal);
+    calculatePricePerCharger(grandTotal1);
 }
 
 function calculatePricePerCharger(grandTotal) {

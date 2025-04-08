@@ -131,14 +131,14 @@ function calculateTotals() {
     });
 
     // Check if no Miscellaneous or Equipment fields are filled
-    if (!hasMiscData && !hasEquipData) {
+    /*if (!hasMiscData || !hasEquipData) {
         Swal.fire({
             icon: 'warning',
             title: 'Validation Error',
             text: 'Please fill out at least one Miscellaneous or Equipment field.',
         });
         return null; // Stop further execution
-    }
+    }*/
 
     // Display Miscellaneous and Equipment totals
     document.getElementById('misc-total').textContent = `Total Miscellaneous Cost: $${miscTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;

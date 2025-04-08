@@ -34,6 +34,16 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(portfolio_bp)
 app.add_url_rule("/", endpoint="index")
 
+# Custom Jinja2 filter for currency formatting
+@app.template_filter('currency')
+def currency_format(value):
+    if value is None:
+        return "$0.00"
+    return f"${value:,.2f}"
+
+# Register the filter
+app.jinja_env.filters['currency'] = currency_format
+
 @app.teardown_appcontext
 def teardown_db(exception):
     db.session.remove()

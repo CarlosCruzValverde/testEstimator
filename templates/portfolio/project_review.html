@@ -190,9 +190,9 @@
                                     {% for entry in cost_estimation.awg %}
                                     <tr>
                                         <td>{{ entry.name }}</td>
-                                        <td>${{ "%.2f"|format(entry.cost) }}</td>
+                                        <td>{{ entry.cost | currency }}</td>
                                         <td>{{ "%.2f"|format(entry.length) }}</td>
-                                        <td>${{ "%.2f"|format(entry.subtotal) }}</td>
+                                        <td>{{ entry.subtotal | currency }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -213,9 +213,9 @@
                                     {% for entry in cost_estimation.conduit %}
                                     <tr>
                                         <td>{{ entry.name }}</td>
-                                        <td>${{ "%.2f"|format(entry.cost) }}</td>
+                                        <td>{{ entry.cost | currency }}</td>
                                         <td>{{ "%.2f"|format(entry.length) }}</td>
-                                        <td>${{ "%.2f"|format(entry.subtotal) }}</td>
+                                        <td>{{ entry.subtotal | currency }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -227,22 +227,20 @@
                             <p><strong>Tax Percentage:</strong> {{ cost_estimation.main.tax_percentage }}%</p>
                         </div>
                         <div class="col-md-4">
-                            <p><strong>AWG Total:</strong> ${{ "%.2f"|format(cost_estimation.main.awg_total or 0) }}</p>
+                            <p><strong>AWG Total:</strong> {{ (cost_estimation.main.awg_total or 0) | currency }}</p>
                         </div>
                         <div class="col-md-4">
-                            <p><strong>Conduit Total:</strong> ${{ "%.2f"|format(cost_estimation.main.conduit_total or
-                                0) }}</p>
+                            <p><strong>Conduit Total:</strong> {{ (cost_estimation.main.conduit_total or 0) | currency
+                                }}</p>
                         </div>
                         <div class="col-md-4">
-                            <p><strong>Tax Amount:</strong> ${{ "%.2f"|format(cost_estimation.main.tax_amount or
-                                0) }}</p>
+                            <p><strong>Tax Amount:</strong> {{ (cost_estimation.main.tax_amount or 0) | currency }}</p>
                         </div>
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-4">
-                            <p style="color: navy;"><strong>Grand Total:</strong> ${{
-                                "%.2f"|format(cost_estimation.main.grand_total or 0) }}
-                            </p>
+                            <p style="color: navy;"><strong>Grand Total:</strong> {{ (cost_estimation.main.grand_total
+                                or 0) | currency }}</p>
                         </div>
                     </div>
                 </div>
@@ -375,9 +373,9 @@
                                     {% for entry in misc_equipment.misc %}
                                     <tr>
                                         <td>{{ entry.name }}</td>
-                                        <td>${{ "%.2f"|format(entry.cost) }}</td>
+                                        <td>{{ entry.cost | currency }}</td>
                                         <td>{{ entry.quantity }}</td>
-                                        <td>${{ "%.2f"|format(entry.subtotal) }}</td>
+                                        <td>{{ entry.subtotal | currency }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -398,9 +396,9 @@
                                     {% for entry in misc_equipment.equipment %}
                                     <tr>
                                         <td>{{ entry.name }}</td>
-                                        <td>${{ "%.2f"|format(entry.cost) }}</td>
+                                        <td>{{ entry.cost | currency }}</td>
                                         <td>{{ entry.quantity }}</td>
-                                        <td>${{ "%.2f"|format(entry.subtotal) }}</td>
+                                        <td>{{ entry.subtotal | currency }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -412,23 +410,20 @@
                             <p><strong>Tax Percentage:</strong> {{ misc_equipment.main.tax_percentage }}%</p>
                         </div>
                         <div class="col-md-4">
-                            <p><strong>Misc Total:</strong> ${{ "%.2f"|format(misc_equipment.main.misc_total or 0) }}
+                            <p><strong>Misc Total:</strong> {{ (misc_equipment.main.misc_total or 0) | currency }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Equip Total:</strong> {{ (misc_equipment.main.equipment_total or 0) | currency }}
                             </p>
                         </div>
                         <div class="col-md-4">
-                            <p><strong>Equip Total:</strong> ${{ "%.2f"|format(misc_equipment.main.equipment_total or 0)
-                                }}</p>
-                        </div>
-                        <div class="col-md-4">
-                            <p><strong>Tax Amount:</strong> ${{ "%.2f"|format(misc_equipment.main.tax_amount or
-                                0) }}</p>
+                            <p><strong>Tax Amount:</strong> {{ (misc_equipment.main.tax_amount or 0) | currency }}</p>
                         </div>
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-4">
-                            <p style="color: navy;"><strong>Grand Total:</strong> ${{
-                                "%.2f"|format(misc_equipment.main.grand_total or 0) }}
-                            </p>
+                            <p style="color: navy;"><strong>Grand Total:</strong> {{ (misc_equipment.main.grand_total or
+                                0) | currency }}</p>
                         </div>
                     </div>
                 </div>
@@ -560,11 +555,11 @@
                             {% for entry in labor_cost.entries %}
                             <tr>
                                 <td>{{ entry.position }}</td>
-                                <td>${{ "%.2f"|format(entry.rate) }}</td>
+                                <td>{{ entry.rate | currency }}</td>
                                 <td>{{ entry.workers }}</td>
                                 <td>{{ "%.1f"|format(entry.hours) }}</td>
                                 <td>{{ "%.1f"|format(entry.days) }}</td>
-                                <td>${{ "%.2f"|format(entry.subtotal) }}</td>
+                                <td>{{ entry.subtotal | currency }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -574,21 +569,20 @@
                             <p><strong>Chargers:</strong> {{ labor_cost.main.chargers_count }}</p>
                         </div>
                         <div class="col-md-4">
-                            <p><strong>Charger Price:</strong> ${{ "%.2f"|format(labor_cost.main.charger_price or 0) }}
-                            </p>
+                            <p><strong>Charger Price:</strong> {{ (labor_cost.main.charger_price or 0) | currency }}</p>
                         </div>
                         <div class="col-md-4">
-                            <p><strong>Labor Total:</strong> ${{ "%.2f"|format(labor_cost.main.labor_total or 0) }}</p>
+                            <p><strong>Labor Total:</strong> {{ (labor_cost.main.labor_total or 0) | currency }}</p>
                         </div>
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-4">
-                            <p><strong>Low Voltage Total:</strong> ${{ "%.2f"|format(labor_cost.main.low_voltage_total
-                                or 0) }}</p>
+                            <p><strong>Low Voltage Total:</strong> {{ (labor_cost.main.low_voltage_total or 0) |
+                                currency }}</p>
                         </div>
                         <div class="col-md-4">
-                            <p style="color: navy;"><strong>Grand Total:</strong> ${{
-                                "%.2f"|format(labor_cost.main.grand_total or 0) }}</p>
+                            <p style="color: navy;"><strong>Grand Total:</strong> {{ (labor_cost.main.grand_total or 0)
+                                | currency }}</p>
                         </div>
                     </div>
                 </div>
@@ -679,15 +673,166 @@
         <div class="card-body">
             <form method="POST" action="{{ url_for('portfolio.update_summary', project_id=project.id) }}">
                 <input type="hidden" name="form_type" value="project_summary">
-                <input type="hidden" id="awg-base-cost" value="{{ summary.awg_base_cost }}">
-                <input type="hidden" id="conduit-base-cost" value="{{ summary.conduit_base_cost }}">
-                <input type="hidden" id="misc-base-cost" value="{{ summary.misc_base_cost }}">
-                <input type="hidden" id="equipment-base-cost" value="{{ summary.equipment_base_cost }}">
-                <input type="hidden" id="labor-base-cost" value="{{ summary.labor_base_cost }}">
-                <input type="hidden" id="low-voltage-base-cost" value="{{ summary.low_voltage_base_cost }}">
 
                 <!-- View Mode -->
                 <div class="view-mode">
+                    <div class="summary-grid mb-4">
+                        <!-- Row Headers -->
+                        <div class="grid-header">Category</div>
+                        <div class="grid-header">Base Cost</div>
+                        <div class="grid-header">Mark Up</div>
+                        <div class="grid-header">Subtotal</div>
+                        <div class="grid-header">Profit</div>
+
+                        <!-- AWG Row -->
+                        <div class="highlight">AWG</div>
+                        <div class="base-cost">{{ summary.awg_base_cost | currency }}</div>
+                        <div>{{ "%.2f"|format(summary.awg_markup) }}</div>
+                        <div class="sub">{{ summary.awg_subtotal | currency }}</div>
+                        <div>{{ summary.awg_profit | currency }}</div>
+
+                        <!-- Conduit Row -->
+                        <div class="highlight">Conduit</div>
+                        <div class="base-cost">{{ summary.conduit_base_cost | currency }}</div>
+                        <div>{{ "%.2f"|format(summary.conduit_markup) }}</div>
+                        <div class="sub">{{ summary.conduit_subtotal | currency }}</div>
+                        <div>{{ summary.conduit_profit | currency }}</div>
+
+                        <!-- Miscellaneous Row -->
+                        <div class="highlight">Miscellaneous</div>
+                        <div class="base-cost">{{ summary.misc_base_cost | currency }}</div>
+                        <div>{{ "%.2f"|format(summary.misc_markup) }}x</div>
+                        <div class="sub">{{ summary.misc_subtotal | currency }}</div>
+                        <div>{{ summary.misc_profit | currency }}</div>
+
+                        <!-- Equipment Row -->
+                        <div class="highlight">Equipment</div>
+                        <div class="base-cost">{{ summary.equipment_base_cost | currency }}</div>
+                        <div>{{ "%.2f"|format(summary.equipment_markup) }}x</div>
+                        <div class="sub">{{ summary.equipment_subtotal | currency }}</div>
+                        <div>{{ summary.equipment_profit | currency }}</div>
+
+                        <!-- Labor Row -->
+                        <div class="highlight">Labor</div>
+                        <div class="base-cost">{{ summary.labor_base_cost | currency }}</div>
+                        <div>{{ "%.2f"|format(summary.labor_markup) }}x</div>
+                        <div class="sub">{{ summary.labor_subtotal | currency }}</div>
+                        <div>{{ summary.labor_profit | currency }}</div>
+
+                        <!-- Low Voltage Row -->
+                        <div class="highlight">Low Voltage</div>
+                        <div class="base-cost">{{ summary.low_voltage_base_cost | currency }}</div>
+                        <div>{{ "%.2f"|format(summary.low_voltage_markup) }}x</div>
+                        <div class="sub">{{ summary.low_voltage_subtotal | currency }}</div>
+                        <div>{{ summary.low_voltage_profit | currency }}</div>
+
+                        <!-- Permits & Fees Row -->
+                        <div class="highlight">Permits & Fees</div>
+                        <div class="base-cost">{{ summary.permits_base_cost | currency }}</div>
+                        <div>{{ "%.2f"|format(summary.permits_markup) }}x</div>
+                        <div class="sub">{{ summary.permits_subtotal | currency }}</div>
+                        <div>{{ summary.permits_profit | currency }}</div>
+                    </div>
+
+                    <!-- Summary Profit -->
+                    <div class="summary-breakdown1">
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Total Profit:</span>
+                            <span>{{ (summary.awg_profit + summary.conduit_profit + summary.misc_profit +
+                                summary.equipment_profit + summary.labor_profit + summary.low_voltage_profit +
+                                summary.permits_profit) | currency }}</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-grid">
+                        <!-- Income Tax Row (modified with IDs) -->
+                        <div class="highlight">Income Tax</div>
+                        <div class="base-cost2" id="tax-base-cost">{{ summary.tax_base_cost | currency }}</div>
+                        <div>
+                            {{ "%.2f"|format(summary.tax_percentage) }}%
+                        </div>
+                        <div class="sub" id="tax-subtotal">{{ summary.tax_subtotal | currency }}</div>
+                        <div></div>
+
+                        <!-- Overhead Margin Row -->
+                        <div class="highlight">Overhead Margin</div>
+                        <div class="base-cost3">{{ summary.overhead_base_cost | currency }}</div>
+                        <div>
+                            {{ "%.2f"|format(summary.overhead_percentage) }}%
+                        </div>
+                        <div class="sub">{{ summary.overhead_subtotal | currency }}</div>
+                        <div></div>
+                    </div>
+
+                    <!-- Summary Breakdown -->
+                    <div class="summary-breakdown">
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Grand Subtotal:</span>
+                            <span>{{ summary.grand_subtotal | currency }}</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Income Tax ({{ "%.2f"|format(summary.tax_percentage)
+                                }}%):</span>
+                            <span>{{ summary.tax_subtotal | currency }}</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Overhead Margin ({{ "%.2f"|format(summary.overhead_percentage)
+                                }}%):</span>
+                            <span>{{ summary.overhead_subtotal | currency }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Grand Total -->
+                    <div class="grand-total-section">
+                        <h2>Grand Total: {{ summary.grand_total | currency }}</h2>
+                    </div>
+
+                    <!-- Charger Information -->
+                    <div class="charger-info">
+                        <div class="charger-row">
+                            <span class="charger-label">Number of Chargers:</span>
+                            <span>{{ project.labor_cost_estimations.first().chargers_count if
+                                project.labor_cost_estimations.first() else 0 }}</span>
+                        </div>
+                        <div class="charger-row">
+                            <span class="charger-label">Price Per Charger:</span>
+                            <span>{{ summary.price_per_charger | currency if summary.price_per_charger else '$0.00'
+                                }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Approval Status -->
+                    <div class="approval-section mb-4">
+                        <span class="approval-label">Approved:</span>
+                        <span class="info-value {% if summary.approved %}text-success{% else %}text-danger{% endif %}">
+                            {% if summary.approved %}Approved{% else %}Not Approved{% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Total Submitted and Approved Amount -->
+                    <div class="summary-breakdown">
+                        <div class="breakdown-row">
+                            <span class="fw-bold">Total Submitted:</span>
+                            <span>{{ summary.total_submitted | currency if summary.total_submitted else '$0.00'
+                                }}</span>
+                        </div>
+                        <div></div>
+                        <div class="breakdown-row">
+                            <span class="fw-bold">Approved Amount:</span>
+                            <span>{{ summary.approved_amount | currency if summary.approved_amount else '$0.00'
+                                }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="notes-section">
+                        <label>Additional Notes:</label>
+                        <div class="notes-content">{{ summary.notes or 'No notes' }}</div>
+                    </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <div class="edit-mode d-none">
                     <div class="container">
                         <div class="summary-grid" style="margin-bottom: 40px;">
                             <!-- Row Headers -->
@@ -699,368 +844,153 @@
 
                             <!-- AWG Row -->
                             <div class="highlight">AWG</div>
-                            <div class="base-cost">${{ "%.2f"|format(summary.awg_base_cost) }}</div>
-                            <div>{{ "%.2f"|format(summary.awg_markup) }}x</div>
-                            <div class="sub">${{ "%.2f"|format(summary.awg_subtotal) }}</div>
-                            <div id="awg-profit">${{ "%.2f"|format(summary.awg_profit) }}</div>
+                            <div id="awg-base-cost" class="base-cost">${{ "%.2f"|format(summary.awg_base_cost) }}</div>
+                            <div><input type="number" step="0.01" min="1.0" name="awg_markup"
+                                    value="{{ summary.awg_markup }}" class="form-control form-control-sm"></div>
+                            <div class="sub">$<span id="awg-subtotal">{{ "%.2f"|format(summary.awg_subtotal) }}</span>
+                            </div>
+                            <div>$<span id="awg-profit">{{ "%.2f"|format(summary.awg_profit) }}</span></div>
 
                             <!-- Conduit Row -->
                             <div class="highlight">Conduit</div>
-                            <div class="base-cost">${{ "%.2f"|format(summary.conduit_base_cost) }}</div>
-                            <div>{{ "%.2f"|format(summary.conduit_markup) }}x</div>
-                            <div class="sub">${{ "%.2f"|format(summary.conduit_subtotal) }}</div>
-                            <div id="conduit-profit">${{ "%.2f"|format(summary.conduit_profit) }}</div>
+                            <div id="conduit-base-cost" class="base-cost">${{ "%.2f"|format(summary.conduit_base_cost)
+                                }}</div>
+                            <div><input type="number" step="0.1" min="1.0" name="conduit_markup"
+                                    value="{{ summary.conduit_markup }}" class="form-control form-control-sm"></div>
+                            <div class="sub">$<span id="conduit-subtotal">{{ "%.2f"|format(summary.conduit_subtotal)
+                                    }}</span></div>
+                            <div>$<span id="conduit-profit">{{ "%.2f"|format(summary.conduit_profit) }}</span></div>
 
                             <!-- Miscellaneous Row -->
                             <div class="highlight">Miscellaneous</div>
-                            <div class="base-cost">${{ "%.2f"|format(summary.misc_base_cost) }}</div>
-                            <div>{{ "%.2f"|format(summary.misc_markup) }}x</div>
-                            <div class="sub">${{ "%.2f"|format(summary.misc_subtotal) }}</div>
-                            <div id="misc-profit">${{ "%.2f"|format(summary.misc_profit) }}</div>
+                            <div id="misc-base-cost" class="base-cost">${{ "%.2f"|format(summary.misc_base_cost) }}
+                            </div>
+                            <div><input type="number" step="0.1" min="1.0" name="misc_markup"
+                                    value="{{ summary.misc_markup }}" class="form-control form-control-sm"></div>
+                            <div class="sub">$<span id="misc-subtotal">{{ "%.2f"|format(summary.misc_subtotal) }}</span>
+                            </div>
+                            <div>$<span id="misc-profit">{{ "%.2f"|format(summary.misc_profit) }}</span></div>
 
                             <!-- Equipment Row -->
                             <div class="highlight">Equipment</div>
-                            <div class="base-cost">${{ "%.2f"|format(summary.equipment_base_cost) }}</div>
-                            <div>{{ "%.2f"|format(summary.equipment_markup) }}x</div>
-                            <div class="sub">${{ "%.2f"|format(summary.equipment_subtotal) }}</div>
-                            <div id="equipment-profit">${{ "%.2f"|format(summary.equipment_profit) }}</div>
+                            <div id="equipment-base-cost" class="base-cost">${{
+                                "%.2f"|format(summary.equipment_base_cost) }}</div>
+                            <div><input type="number" step="0.1" min="1.0" name="equipment_markup"
+                                    value="{{ summary.equipment_markup }}" class="form-control form-control-sm"></div>
+                            <div class="sub">$<span id="equipment-subtotal">{{ "%.2f"|format(summary.equipment_subtotal)
+                                    }}</span></div>
+                            <div>$<span id="equipment-profit">{{ "%.2f"|format(summary.equipment_profit) }}</span></div>
 
                             <!-- Labor Row -->
                             <div class="highlight">Labor</div>
-                            <div class="base-cost">${{ "%.2f"|format(summary.labor_base_cost) }}</div>
-                            <div>{{ "%.2f"|format(summary.labor_markup) }}x</div>
-                            <div class="sub">${{ "%.2f"|format(summary.labor_subtotal) }}</div>
-                            <div id="labor-profit">${{ "%.2f"|format(summary.labor_profit) }}</div>
+                            <div id="labor-base-cost" class="base-cost">${{ "%.2f"|format(summary.labor_base_cost) }}
+                            </div>
+                            <div><input type="number" step="0.1" min="1.0" name="labor_markup"
+                                    value="{{ summary.labor_markup }}" class="form-control form-control-sm"></div>
+                            <div class="sub">$<span id="labor-subtotal">{{ "%.2f"|format(summary.labor_subtotal)
+                                    }}</span></div>
+                            <div>$<span id="labor-profit">{{ "%.2f"|format(summary.labor_profit) }}</span></div>
 
                             <!-- Low Voltage Row -->
                             <div class="highlight">Low Voltage</div>
-                            <div class="base-cost">${{ "%.2f"|format(summary.low_voltage_base_cost) }}</div>
-                            <div>{{ "%.2f"|format(summary.low_voltage_markup) }}x</div>
-                            <div class="sub">${{ "%.2f"|format(summary.low_voltage_subtotal) }}</div>
-                            <div id="low-voltage-profit">${{ "%.2f"|format(summary.low_voltage_profit) }}</div>
+                            <div id="low-voltage-base-cost" class="base-cost">${{
+                                "%.2f"|format(summary.low_voltage_base_cost) }}</div>
+                            <div><input type="number" step="0.1" min="1.0" name="low_voltage_markup"
+                                    value="{{ summary.low_voltage_markup }}" class="form-control form-control-sm"></div>
+                            <div class="sub">$<span id="low-voltage-subtotal">{{
+                                    "%.2f"|format(summary.low_voltage_subtotal) }}</span></div>
+                            <div>$<span id="low-voltage-profit">{{ "%.2f"|format(summary.low_voltage_profit) }}</span>
+                            </div>
 
                             <!-- Permits & Fees Row -->
                             <div class="highlight">Permits & Fees</div>
-                            <div class="base-cost">${{ "%.2f"|format(summary.permits_base_cost) }}</div>
-                            <div>{{ "%.2f"|format(summary.permits_markup) }}x</div>
-                            <div class="sub">${{ "%.2f"|format(summary.permits_subtotal) }}</div>
-                            <div id="permits-profit">${{ "%.2f"|format(summary.permits_profit) }}</div>
-                        </div>
+                            <div id="permits-base-cost" class="base-cost">${{ "%.2f"|format(summary.permits_base_cost)
+                                }}</div>
+                            <div><input type="number" step="0.1" min="1.0" name="permits_markup"
+                                    value="{{ summary.permits_markup }}" class="form-control form-control-sm"></div>
+                            <div class="sub">$<span id="permits-subtotal">{{ "%.2f"|format(summary.permits_subtotal)
+                                    }}</span></div>
+                            <div>$<span id="permits-profit">{{ "%.2f"|format(summary.permits_profit) }}</span></div>
 
-                        <!-- Summary Profit -->
-                        <div class="summary-breakdown1">
-                            <div class="breakdown-row">
-                                <span class="breakdown-label">Total Profit:</span>
-                                <span>${{ "%.2f"|format(summary.awg_profit + summary.conduit_profit +
-                                    summary.misc_profit +
-                                    summary.equipment_profit + summary.labor_profit +
-                                    summary.low_voltage_profit + summary.permits_profit) }}</span>
-                            </div>
+                            <!-- Total Profit Row -->
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div class="fw-bold">Total Profit</div>
+                            <div style="color: rgb(0, 0, 143);">$<span id="total-profit">0.00</span></div>
                         </div>
 
                         <div class="summary-grid">
-                            <!-- Income Tax Row (modified with IDs) -->
+                            <!-- Income Tax Row -->
                             <div class="highlight">Income Tax</div>
-                            <div class="base-cost2" id="tax-base-cost">${{ "%.2f"|format(summary.tax_base_cost) }}</div>
-                            <div>
-                                {{ "%.2f"|format(summary.tax_percentage) }}%
+                            <div class="base-cost2">$<span id="tax-base-cost">{{ "%.2f"|format(summary.tax_base_cost)
+                                    }}</span></div>
+                            <div><input type="number" step="1" min="0" name="tax_percentage"
+                                    value="{{ summary.tax_percentage }}"
+                                    class="form-control form-control-sm"><span>%</span></div>
+                            <div class="sub">$<span id="tax-subtotal">{{ "%.2f"|format(summary.tax_subtotal) }}</span>
                             </div>
-                            <div class="sub" id="tax-subtotal">${{ "%.2f"|format(summary.tax_subtotal) }}</div>
                             <div></div>
 
                             <!-- Overhead Margin Row -->
                             <div class="highlight">Overhead Margin</div>
-                            <div class="base-cost3">${{ "%.2f"|format(summary.overhead_base_cost) }}</div>
-                            <div>
-                                {{ "%.2f"|format(summary.overhead_percentage) }}%
+                            <div>$<span id="overhead-base-cost">{{ "%.2f"|format(summary.overhead_base_cost) }}</span>
                             </div>
-                            <div class="sub">${{ "%.2f"|format(summary.overhead_subtotal) }}</div>
+                            <div>
+                                <input type="number" name="overhead_percentage"
+                                    value="{{ summary.overhead_percentage }}" step="0.1" min="0"
+                                    class="percentage-input">
+                                <span>%</span>
+                            </div>
+                            <div>$<span id="overhead-subtotal">{{ "%.2f"|format(summary.overhead_subtotal) }}</span>
+                            </div>
                             <div></div>
                         </div>
-
-                        <!-- Summary Breakdown -->
-                        <div class="summary-breakdown">
-                            <div class="breakdown-row">
-                                <span class="breakdown-label">Grand Subtotal:</span>
-                                <span>${{ "%.2f"|format(summary.grand_subtotal) }}</span>
-                            </div>
-                            <div class="breakdown-row">
-                                <span class="breakdown-label">Income Tax ({{ "%.2f"|format(summary.tax_percentage)
-                                    }}%):</span>
-                                <span>${{ "%.2f"|format(summary.tax_subtotal) }}</span>
-                            </div>
-                            <div class="breakdown-row">
-                                <span class="breakdown-label">Overhead Margin ({{
-                                    "%.2f"|format(summary.overhead_percentage) }}%):</span>
-                                <span>${{ "%.2f"|format(summary.overhead_subtotal) }}</span>
-                            </div>
-                        </div>
-
-                        <!-- Grand Total -->
-                        <div class="grand-total-section">
-                            <h2>Grand Total: ${{ "%.2f"|format(summary.grand_total) }}</h2>
-                        </div>
-
-                        <!-- Charger Information -->
-                        <div class="charger-info">
-                            <div class="charger-row">
-                                <span class="charger-label">Number of Chargers:</span>
-                                <span>{{ project.labor_cost_estimations.first().chargers_count if
-                                    project.labor_cost_estimations.first() else 0 }}</span>
-                            </div>
-                            <div class="charger-row">
-                                <span class="charger-label">Price Per Charger:</span>
-                                <span>${{ "%.2f"|format(summary.price_per_charger) if summary.price_per_charger else
-                                    '0.00' }}</span>
-                            </div>
-                        </div>
-
-                        <!-- Approval Status -->
-                        <div class="approval-section">
-                            <span class="approval-label">Approved:</span>
-                            <span
-                                class="info-value {% if summary.approved %}text-success{% else %}text-danger{% endif %}">
-                                {% if summary.approved %}Approved{% else %}Not Approved{% endif %}
-                            </span>
-                        </div>
-
-                        <!-- Notes -->
-                        <div class="notes-section">
-                            <label>Additional Notes:</label>
-                            <div class="notes-content">{{ summary.notes or 'No notes' }}</div>
-                        </div>
                     </div>
-                </div>
 
-                <!-- Edit Mode -->
-                <div class="edit-mode d-none">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h3>Cost Breakdown</h3>
-                            <table class="table" id="cost-breakdown-table">
-                                <thead>
-                                    <tr>
-                                        <th>Category</th>
-                                        <th>Base Cost</th>
-                                        <th>Markup</th>
-                                        <th>Subtotal</th>
-                                        <th>Profit</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- AWG Row -->
-                                    <tr>
-                                        <td>AWG</td>
-                                        <td>$<span class="base-cost">{{ "%.2f"|format(summary.awg_base_cost) }}</span>
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01" name="awg_markup"
-                                                class="form-control form-control-sm markup-input" value="{{ "
-                                                %.2f"|format(summary.awg_markup) }}" data-category="awg"
-                                                data-base-cost="{{ summary.awg_base_cost }}">
-                                        </td>
-                                        <td class="subtotal" id="awg-subtotal-display">${{
-                                            "%.2f"|format(summary.awg_subtotal) }}</td>
-                                        <td class="profit" id="awg-profit-display">${{ "%.2f"|format(summary.awg_profit)
-                                            }}</td>
-                                    </tr>
-                                    <!-- Conduit Row -->
-                                    <tr>
-                                        <td>Conduit</td>
-                                        <td>$<span class="base-cost">{{ "%.2f"|format(summary.conduit_base_cost)
-                                                }}</span></td>
-                                        <td>
-                                            <input type="number" step="0.01" name="conduit_markup"
-                                                class="form-control form-control-sm markup-input" value="{{ "
-                                                %.2f"|format(summary.conduit_markup) }}" data-category="conduit"
-                                                data-base-cost="{{ summary.conduit_base_cost }}">
-                                        </td>
-                                        <td class="subtotal" id="conduit-subtotal-display">${{
-                                            "%.2f"|format(summary.conduit_subtotal) }}</td>
-                                        <td class="profit" id="conduit-profit-display">${{
-                                            "%.2f"|format(summary.conduit_profit) }}</td>
-                                    </tr>
-                                    <!-- Miscellaneous Row -->
-                                    <tr>
-                                        <td>Miscellaneous</td>
-                                        <td>$<span class="base-cost">{{ "%.2f"|format(summary.misc_base_cost) }}</span>
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01" name="misc_markup"
-                                                class="form-control form-control-sm markup-input" value="{{ "
-                                                %.2f"|format(summary.misc_markup) }}" data-category="misc"
-                                                data-base-cost="{{ summary.misc_base_cost }}">
-                                        </td>
-                                        <td class="subtotal" id="misc-subtotal-display">${{
-                                            "%.2f"|format(summary.misc_subtotal) }}</td>
-                                        <td class="profit" id="misc-profit-display">${{
-                                            "%.2f"|format(summary.misc_profit) }}</td>
-                                    </tr>
-                                    <!-- Equipment Row -->
-                                    <tr>
-                                        <td>Equipment</td>
-                                        <td>$<span class="base-cost">{{ "%.2f"|format(summary.equipment_base_cost)
-                                                }}</span></td>
-                                        <td>
-                                            <input type="number" step="0.01" name="equipment_markup"
-                                                class="form-control form-control-sm markup-input" value="{{ "
-                                                %.2f"|format(summary.equipment_markup) }}" data-category="equipment"
-                                                data-base-cost="{{ summary.equipment_base_cost }}">
-                                        </td>
-                                        <td class="subtotal" id="equipment-subtotal-display">${{
-                                            "%.2f"|format(summary.equipment_subtotal) }}</td>
-                                        <td class="profit" id="equipment-profit-display">${{
-                                            "%.2f"|format(summary.equipment_profit) }}</td>
-                                    </tr>
-                                    <!-- Labor Row -->
-                                    <tr>
-                                        <td>Labor</td>
-                                        <td>$<span class="base-cost">{{ "%.2f"|format(summary.labor_base_cost) }}</span>
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01" name="labor_markup"
-                                                class="form-control form-control-sm markup-input" value="{{ "
-                                                %.2f"|format(summary.labor_markup) }}" data-category="labor"
-                                                data-base-cost="{{ summary.labor_base_cost }}">
-                                        </td>
-                                        <td class="subtotal" id="labor-subtotal-display">${{
-                                            "%.2f"|format(summary.labor_subtotal) }}</td>
-                                        <td class="profit" id="labor-profit-display">${{
-                                            "%.2f"|format(summary.labor_profit) }}</td>
-                                    </tr>
-                                    <!-- Low Voltage Row -->
-                                    <tr>
-                                        <td>Low Voltage</td>
-                                        <td>$<span class="base-cost" id="low-voltage-base-cost-display">{{
-                                                "%.2f"|format(summary.low_voltage_base_cost) }}</span></td>
-                                        <td>
-                                            <input type="number" step="0.01" name="low_voltage_markup"
-                                                id="low-voltage-markup-input"
-                                                class="form-control form-control-sm markup-input" value="{{ "
-                                                %.2f"|format(summary.low_voltage_markup) }}" data-category="low-voltage"
-                                                data-base-cost="{{ summary.low_voltage_base_cost }}">
-                                        </td>
-                                        <td class="subtotal" id="low-voltage-subtotal-display">${{
-                                            "%.2f"|format(summary.low_voltage_subtotal) }}</td>
-                                        <td class="profit" id="low-voltage-profit-display">${{
-                                            "%.2f"|format(summary.low_voltage_profit) }}</td>
-                                    </tr>
-
-                                    <!-- Permits & Fees Row -->
-                                    <tr>
-                                        <td>Permits & Fees</td>
-                                        <td>
-                                            <input type="number" step="0.01" name="permits_base_cost"
-                                                class="form-control form-control-sm"
-                                                value="{{ summary.permits_base_cost }}">
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01" name="permits_markup"
-                                                class="form-control form-control-sm markup-input" value="{{ "
-                                                %.2f"|format(summary.permits_markup) }}" data-category="permits"
-                                                data-base-cost="{{ summary.permits_base_cost }}">
-                                        </td>
-                                        <td class="subtotal" id="permits-subtotal-display">${{
-                                            "%.2f"|format(summary.permits_subtotal) }}</td>
-                                        <td class="profit" id="permits-profit-display">${{
-                                            "%.2f"|format(summary.permits_profit) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                    <!-- Total Profit Row -->
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="fw-bold">Total Profit</td>
-                                        <td style="color: rgb(0, 0, 143);">$<span id="total-profit">0.00</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                    <!-- Income Tax Row -->
-                                    <tr>
-                                        <td>Income Tax</td>
-                                        <td>$<span id="total-profit-display">0.00</span></td>
-                                        <td>
-                                            <input type="number" step="0.01" name="tax_percentage"
-                                                class="form-control form-control-sm markup-input" value=" {{ "
-                                                %.2f"|format(summary.tax_percentage) }}" data-category=""
-                                                data-base-cost="{{ summary.tax_base_cost }}">
-                                        </td>
-                                        <td class="subtotal" id="tax-amount-display">${{
-                                            "%.2f"|format(summary.tax_subtotal) }}
-                                        </td>
-                                    </tr>
-
-                                    <!-- Overhead Margin Row -->
-                                    <tr>
-                                        <td>Overhead Margin</td>
-                                        <td></td>
-                                        <td>
-                                            <input type="number" step="0.01" name="overhead_percentage"
-                                                class="form-control form-control-sm markup-input" value=" {{ "
-                                                %.2f"|format(summary.overhead_percentage) }}" data-category=""
-                                                data-base-cost="{{ summary.overhead_base_cost }}">
-                                        </td>
-                                        <td class="subtotal" id="overhead-amount-display">${{
-                                            "%.2f"|format(summary.overhead_subtotal) }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="summary-breakdown">
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Grand Subtotal:</span>
+                            <span>$<span id="grand-subtotal">{{ "%.2f"|format(summary.grand_subtotal)
+                                    }}</span></span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Income Tax (<span id="tax-percentage-display">{{
+                                    summary.tax_percentage }}</span>% of profit):</span>
+                            <span>$<span id="tax-summary">{{ "%.2f"|format(summary.tax_subtotal)
+                                    }}</span></span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Overhead Margin (<span id="overhead-percentage-display">{{
+                                    summary.overhead_percentage }}</span>%):</span>
+                            <span>$<span id="overhead-summary">{{ "%.2f"|format(summary.overhead_subtotal)
+                                    }}</span></span>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h3>Financial Summary</h3>
-                            <table class="table">
-                                <tr>
-                                    <th>Category</th>
-                                    <th>Amount</th>
-                                </tr>
-                                <tr>
-                                    <td>Grand Subtotal</td>
-                                    <td>$<span id="grand-subtotal-summary-display">{{
-                                            "%.2f"|format(summary.grand_subtotal) }}</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Tax Amount</td>
-                                    <td>$<span id="tax-amount-display-second">{{ "%.2f"|format(summary.tax_subtotal)
-                                            }}</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Overhead Amount</td>
-                                    <td>$<span id="overhead-amount-display">{{ "%.2f"|format(summary.overhead_subtotal)
-                                            }}</span></td>
-                                </tr>
-                                <tr class="table-active">
-                                    <td><strong>Grand Total</strong></td>
-                                    <td><strong>$<span id="grand-total-summary-display">{{
-                                                "%.2f"|format(summary.grand_total) }}</span></strong></td>
-                                </tr>
-                            </table>
+                    <div class="grand-total-section">
+                        <h2>Grand Total: $<span id="grand-total">{{ "%.2f"|format(summary.grand_total)
+                                }}</span></h2>
+                    </div>
 
-                            <!-- Edit Mode - Approval Section -->
-                            <div class="d-flex justify-content-center">
-                                <div class="form-check form-switch mb-3 d-flex align-items-center gap-3">
-                                    <input class="form-check-input" type="checkbox" name="approved" id="approved" {% if
-                                        summary.approved %}checked{% endif %}>
-                                    <label class="form-check-label fw-bold" for="approved">
-                                        Approved
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="notes" class="form-label">Project Notes</label>
-                                <textarea class="form-control" id="notes" name="notes"
-                                    rows="3">{{ summary.notes or '' }}</textarea>
-                            </div>
+                    <div class="approval-section">
+                        <span class="approval-label">Approved:</span>
+                        <div class="approval-options">
+                            <label class="radio-option">
+                                <input type="radio" name="approved" value="true" {% if summary.approved %}checked{%
+                                    endif %}>
+                                <span class="radio-checkmark"></span>
+                                <span class="radio-text">Yes</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="approved" value="false" {% if not summary.approved %}checked{%
+                                    endif %}>
+                                <span class="radio-checkmark"></span>
+                                <span class="radio-text">No</span>
+                            </label>
                         </div>
                     </div>
+
                     <div class="text-end mt-3">
                         <button type="button" class="btn btn-secondary cancel-edit">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -1108,6 +1038,131 @@
                 return Math.round(num * 100) / 100; // Force 2 decimal places
             };
 
+            // ==================== PROJECT SUMMARY CALCULATIONS ====================
+            function initializeSummaryCalculations() {
+                // Set up event listeners for summary calculations
+                const summarySection = document.getElementById('project-summary');
+
+                // Markup inputs
+                summarySection.querySelectorAll('input[name="awg_markup"], input[name="conduit_markup"], input[name="misc_markup"], input[name="equipment_markup"], input[name="labor_markup"], input[name="low_voltage_markup"], input[name="permits_markup"]').forEach(input => {
+                    input.addEventListener('input', calculateSummaryTotals);
+                });
+
+                // Percentage inputs
+                summarySection.querySelectorAll('input[name="tax_percentage"], input[name="overhead_percentage"]').forEach(input => {
+                    input.addEventListener('input', calculateSummaryTotals);
+                });
+
+                // Initial calculation
+                calculateSummaryTotals();
+            }
+
+            // Attach event listeners immediately
+            initializeSummaryCalculations();
+
+            function calculateSummaryTotals() {
+                // Calculate each category
+                calculateCategorySummary('awg');
+                calculateCategorySummary('conduit');
+                calculateCategorySummary('misc');
+                calculateCategorySummary('equipment');
+                calculateCategorySummary('labor');
+                calculateCategorySummary('low-voltage');
+                calculateCategorySummary('permits');
+
+                // Calculate totals
+                calculateSummaryIncomeTax();
+                calculateSummaryOverheadMargin();
+                calculateSummaryGrandTotals();
+            }
+
+            function calculateCategorySummary(category) {
+                const summarySection = document.getElementById('project-summary');
+                const baseCost = parseFloat(summarySection.querySelector(`#${category}-base-cost`).textContent.replace('$', '')) || 0;
+                const markupInput = summarySection.querySelector(`input[name="${category}_markup"]`);
+                const markup = parseFloat(markupInput.value) || 1.0;
+
+                const subtotal = baseCost * markup;
+                const profit = subtotal - baseCost;
+
+                summarySection.querySelector(`#${category}-subtotal`).textContent = subtotal.toFixed(2);
+                summarySection.querySelector(`#${category}-profit`).textContent = profit.toFixed(2);
+
+                // Update total profit
+                updateTotalProfit();
+            }
+
+            function updateTotalProfit() {
+                const summarySection = document.getElementById('project-summary');
+                const taxableCategories = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'low-voltage', 'permits'];
+                let totalProfit = 0;
+
+                taxableCategories.forEach(category => {
+                    const profit = parseFloat(summarySection.querySelector(`#${category}-profit`).textContent) || 0;
+                    totalProfit += profit;
+                });
+
+                summarySection.querySelector('#total-profit').textContent = totalProfit.toFixed(2);
+            }
+
+            function calculateSummaryIncomeTax() {
+                const summarySection = document.getElementById('project-summary');
+                const taxPercentage = parseFloat(summarySection.querySelector('input[name="tax_percentage"]').value) || 30;
+                const totalProfit = parseFloat(summarySection.querySelector('#total-profit').textContent) || 0;
+                const incomeTax = totalProfit * (taxPercentage / 100);
+
+                // Update displays
+                summarySection.querySelector('#tax-percentage-display').textContent = taxPercentage;
+                summarySection.querySelector('#tax-base-cost').textContent = totalProfit.toFixed(2);
+                summarySection.querySelector('#tax-subtotal').textContent = incomeTax.toFixed(2);
+                summarySection.querySelector('#tax-summary').textContent = incomeTax.toFixed(2);
+            }
+
+            function calculateSummaryOverheadMargin() {
+                const summarySection = document.getElementById('project-summary');
+                const overheadCategories = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'low-voltage', 'permits'];
+                let grandSubtotal = 0;
+
+                overheadCategories.forEach(category => {
+                    const subtotal = parseFloat(summarySection.querySelector(`#${category}-subtotal`).textContent) || 0;
+                    grandSubtotal += subtotal;
+                });
+
+                const overheadPercentage = parseFloat(summarySection.querySelector('input[name="overhead_percentage"]').value) || 8.5;
+                const overheadMargin = grandSubtotal * (overheadPercentage / 100);
+
+                // Update displays
+                summarySection.querySelector('#overhead-percentage-display').textContent = overheadPercentage;
+                summarySection.querySelector('#overhead-base-cost').textContent = grandSubtotal.toFixed(2);
+                summarySection.querySelector('#overhead-subtotal').textContent = overheadMargin.toFixed(2);
+                summarySection.querySelector('#overhead-summary').textContent = overheadMargin.toFixed(2);
+            }
+
+            function calculateSummaryGrandTotals() {
+                const summarySection = document.getElementById('project-summary');
+                const categories = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'low-voltage', 'permits', 'tax', 'overhead'];
+                let grandSubtotal = 0;
+                let grandTotal = 0;
+
+                // Calculate grand subtotal (without tax and overhead)
+                const mainCategories = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'low-voltage', 'permits'];
+                mainCategories.forEach(category => {
+                    const subtotal = parseFloat(summarySection.querySelector(`#${category}-subtotal`).textContent) || 0;
+                    grandSubtotal += subtotal;
+                });
+
+                // Calculate grand total (including tax and overhead)
+                categories.forEach(category => {
+                    const subtotal = parseFloat(summarySection.querySelector(`#${category}-subtotal`).textContent) || 0;
+                    grandTotal += subtotal;
+                });
+
+                // Update displays
+                summarySection.querySelector('#grand-subtotal').textContent = grandSubtotal.toFixed(2);
+                summarySection.querySelector('#grand-total').textContent = grandTotal.toFixed(2);
+            }
+
+
             // Real-time calculations for cost estimation
             function updateCostEstimationTotals() {
                 let awgTotal = 0;
@@ -1120,7 +1175,7 @@
                     const length = normalizeNumber(row.querySelector('input[name^="awg_length_"]').value);
                     const subtotal = normalizeNumber(cost * length);
 
-                    row.querySelector('.subtotal').textContent = '$' + subtotal.toFixed(2);
+                    row.querySelector('.subtotal').textContent = '$' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                     awgTotal += subtotal;
                 });
 
@@ -1131,7 +1186,7 @@
                     const length = normalizeNumber(row.querySelector('input[name^="conduit_length_"]').value);
                     const subtotal = normalizeNumber(cost * length);
 
-                    row.querySelector('.subtotal').textContent = '$' + subtotal.toFixed(2);
+                    row.querySelector('.subtotal').textContent = '$' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                     conduitTotal += subtotal;
                 });
 
@@ -1141,165 +1196,101 @@
                 const taxAmount = normalizeNumber(subtotal * (taxPercentage / 100));
                 const grandTotal = normalizeNumber(subtotal + taxAmount);
 
-                // Update displays
-                document.getElementById('awg-total-display').textContent = awgTotal.toFixed(2);
-                document.getElementById('conduit-total-display').textContent = conduitTotal.toFixed(2);
-                document.getElementById('tax-amount-display').textContent = taxAmount.toFixed(2);
-                document.getElementById('grand-total-display').textContent = grandTotal.toFixed(2);
+                // Update displays with currency format and commas
+                document.getElementById('awg-total-display').textContent = '$' + awgTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('conduit-total-display').textContent = '$' + conduitTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('tax-amount-display').textContent = '$' + taxAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('grand-total-display').textContent = '$' + grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
 
-            function initializeSummaryCalculations() {
-                // Get low voltage elements using specific IDs
-                const lowVoltageMarkupInput = document.getElementById('low-voltage-markup-input');
-                const lowVoltageBaseCostDisplay = document.getElementById('low-voltage-base-cost-display');
+            function updateMiscEquipmentTotals() {
+                let miscTotal = 0;
+                let equipmentTotal = 0;
 
-                // Low voltage calculation function
-                function calculateLowVoltage() {
-                    if (!lowVoltageMarkupInput || !lowVoltageBaseCostDisplay) {
-                        console.error("Low voltage elements not found");
-                        return { subtotal: 0, profit: 0 };
-                    }
+                // Calculate Miscellaneous total
+                document.querySelectorAll('#misc-equipment input[name^="misc_cost_"]').forEach(input => {
+                    const row = input.closest('tr');
+                    const cost = normalizeNumber(input.value);
+                    const quantity = normalizeNumber(row.querySelector('input[name^="misc_quantity_"]').value);
+                    const subtotal = normalizeNumber(cost * quantity);
 
-                    // Get base cost by removing $ sign and converting to number
-                    const baseCost = normalizeNumber(lowVoltageBaseCostDisplay.textContent.replace(/[^\d.-]/g, ''));
-                    const markup = normalizeNumber(lowVoltageMarkupInput.value) || 1;
-                    const subtotal = normalizeNumber(baseCost * markup);
-                    const profit = normalizeNumber(subtotal - baseCost);
-
-                    // Update displays
-                    const subtotalDisplay = document.getElementById('low-voltage-subtotal-display');
-                    const profitDisplay = document.getElementById('low-voltage-profit-display');
-
-                    if (subtotalDisplay) subtotalDisplay.textContent = '$' + subtotal.toFixed(2);
-                    if (profitDisplay) profitDisplay.textContent = '$' + profit.toFixed(2);
-
-                    return { subtotal, profit };
-                }
-
-                // Calculate other categories
-                function calculateCategory(category) {
-                    const markupInput = document.querySelector(`input[name="${category}_markup"]`);
-                    if (!markupInput) return { subtotal: 0, profit: 0 };
-
-                    const baseCost = normalizeNumber(document.getElementById(`${category}-base-cost`).value);
-                    const markup = normalizeNumber(markupInput.value) || 1;
-                    const subtotal = normalizeNumber(baseCost * markup);
-                    const profit = normalizeNumber(subtotal - baseCost);
-
-                    // Update displays
-                    document.getElementById(`${category}-subtotal-display`).textContent = '$' + subtotal.toFixed(2);
-                    document.getElementById(`${category}-profit-display`).textContent = '$' + profit.toFixed(2);
-
-                    return { subtotal, profit };
-                }
-
-                // Main calculation function
-                function calculateTaxAndOverhead() {
-                    // Calculate all categories
-                    const awg = calculateCategory('awg');
-                    const conduit = calculateCategory('conduit');
-                    const misc = calculateCategory('misc');
-                    const equipment = calculateCategory('equipment');
-                    const labor = calculateCategory('labor');
-                    const lowVoltage = calculateLowVoltage(); // Using the dedicated function
-
-                    // Get permits values
-                    const permitsBaseCost = normalizeNumber(document.querySelector('input[name="permits_base_cost"]').value);
-                    const permitsMarkup = normalizeNumber(document.querySelector('input[name="permits_markup"]').value) || 1;
-                    const permitsSubtotal = normalizeNumber(permitsBaseCost * permitsMarkup);
-                    const permitsProfit = normalizeNumber(permitsSubtotal - permitsBaseCost);
-
-                    document.getElementById('permits-subtotal-display').textContent = '$' + permitsSubtotal.toFixed(2);
-                    document.getElementById('permits-profit-display').textContent = '$' + permitsProfit.toFixed(2);
-
-                    // Calculate grand subtotal
-                    const grandSubtotal = normalizeNumber(
-                        awg.subtotal + conduit.subtotal + misc.subtotal +
-                        equipment.subtotal + labor.subtotal +
-                        lowVoltage.subtotal + permitsSubtotal
-                    );
-                    document.getElementById('grand-subtotal-summary-display').textContent = grandSubtotal.toFixed(2);
-
-                    // 1. Calculate total profit (sum of all category profits)
-                    const totalProfit = normalizeNumber(
-                        awg.profit + conduit.profit + misc.profit +
-                        equipment.profit + labor.profit +
-                        lowVoltage.profit + permitsProfit
-                    );
-
-                    // 2. Update total profit display
-                    document.getElementById('total-profit-display').textContent = totalProfit.toFixed(2);
-                    document.getElementById('total-profit').textContent = totalProfit.toFixed(2);
-
-                    // 3. Get tax percentage and calculate tax amount
-                    const taxPercentage = normalizeNumber(document.querySelector('input[name="tax_percentage"]').value);
-                    const taxAmount = normalizeNumber(totalProfit * (taxPercentage / 100));
-                    // 4. Update tax amount display
-                    const taxAmountDisplay = document.getElementById('tax-amount-display');
-                    if (taxAmountDisplay) {
-                        taxAmountDisplay.textContent = '$' + taxAmount.toFixed(2);
-                    }
-                    // Update tax amount display
-                    //document.getElementById('tax-amount-display').textContent = '$' + taxAmount.toFixed(2);
-                    // 5. Calculate overhead (which is working correctly)
-                    const overheadPercentage = normalizeNumber(document.querySelector('input[name="overhead_percentage"]').value);
-                    const overheadAmount = normalizeNumber(grandSubtotal * (overheadPercentage / 100));
-                    document.getElementById('overhead-amount-display').textContent = '$' + overheadAmount.toFixed(2);
-
-                    // 6. Calculate grand total
-                    const grandTotal = normalizeNumber(grandSubtotal + taxAmount + overheadAmount);
-                    document.getElementById('grand-total-summary-display').textContent = grandTotal.toFixed(2);
-                }
-
-                // Set up event listeners 
-                if (lowVoltageMarkupInput) {
-                    lowVoltageMarkupInput.addEventListener('input', calculateTaxAndOverhead);
-                }
-
-                // Add explicit listener for tax percentage FIRST
-                const taxPercentageInput = document.querySelector('input[name="tax_percentage"]');
-                if (taxPercentageInput) {
-                    taxPercentageInput.addEventListener('input', calculateTaxAndOverhead);
-                }
-
-                // Then add other listeners
-                document.querySelectorAll('.markup-input:not([name="tax_percentage"])').forEach(input => {
-                    input.addEventListener('input', calculateTaxAndOverhead);
+                    row.querySelector('.subtotal').textContent = '$' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    miscTotal += subtotal;
                 });
 
-                document.querySelectorAll('input[name="permits_base_cost"], input[name="permits_markup"]').forEach(input => {
-                    input.addEventListener('input', calculateTaxAndOverhead);
+                // Calculate Equipment total
+                document.querySelectorAll('#misc-equipment input[name^="equipment_cost_"]').forEach(input => {
+                    const row = input.closest('tr');
+                    const cost = normalizeNumber(input.value);
+                    const quantity = normalizeNumber(row.querySelector('input[name^="equipment_quantity_"]').value);
+                    const subtotal = normalizeNumber(cost * quantity);
+
+                    row.querySelector('.subtotal').textContent = '$' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    equipmentTotal += subtotal;
                 });
 
-                document.querySelector('input[name="overhead_percentage"]').addEventListener('input', calculateTaxAndOverhead);
+                // Calculate tax and grand total
+                const taxPercentage = normalizeNumber(document.querySelector('#misc-equipment input[name="tax_percentage"]').value);
+                const subtotal = normalizeNumber(miscTotal + equipmentTotal);
+                const taxAmount = normalizeNumber(subtotal * (taxPercentage / 100));
+                const grandTotal = normalizeNumber(subtotal + taxAmount);
 
-                // Initial calculation
-                calculateTaxAndOverhead();
+                // Update displays with currency format
+                document.getElementById('misc-total-display').textContent = '$' + miscTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('equip-total-display').textContent = '$' + equipmentTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('tax-amount-me-display').textContent = '$' + taxAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('grand-total-me-display').textContent = '$' + grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
+
+
+            function updateLaborCostTotals() {
+                let laborTotal = 0;
+
+                // Calculate labor costs for each position
+                document.querySelectorAll('#labor-cost input[name^="rate_"]').forEach(input => {
+                    const row = input.closest('tr');
+                    const rate = normalizeNumber(input.value);
+                    const workers = normalizeNumber(row.querySelector('input[name^="workers_"]').value);
+                    const hours = normalizeNumber(row.querySelector('input[name^="hours_"]').value);
+                    const days = normalizeNumber(row.querySelector('input[name^="days_"]').value);
+                    const subtotal = normalizeNumber(rate * workers * hours * days);
+
+                    row.querySelector('.subtotal').textContent = '$' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    laborTotal += subtotal;
+                });
+
+                // Get charger values
+                const chargersCount = normalizeNumber(document.querySelector('#labor-cost input[name="chargers_count"]').value);
+                const chargerPrice = normalizeNumber(document.querySelector('#labor-cost input[name="charger_price"]').value);
+                const lowVoltageTotal = normalizeNumber(chargersCount * chargerPrice);
+
+                // Calculate grand total
+                const grandTotal = normalizeNumber(laborTotal + lowVoltageTotal);
+
+                // Update displays with currency format
+                document.getElementById('labor-total-display').textContent = '$' + laborTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('low-voltage-total-display').textContent = '$' + lowVoltageTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('grand-total-la-display').textContent = '$' + grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
 
             // Initialize event listeners for all sections
             document.querySelectorAll('#cost-estimation input[type="number"]').forEach(input => {
                 input.addEventListener('input', updateCostEstimationTotals);
             });
 
+            // Initialize event listeners for misc-equipment section
             document.querySelectorAll('#misc-equipment input[type="number"]').forEach(input => {
                 input.addEventListener('input', updateMiscEquipmentTotals);
             });
 
+            // Initialize event listeners for labor-cost section
             document.querySelectorAll('#labor-cost input[type="number"]').forEach(input => {
                 input.addEventListener('input', updateLaborCostTotals);
             });
 
-            document.querySelectorAll('#project-summary input[type="number"]').forEach(input => {
-                input.addEventListener('input', function () {
-                    if (document.querySelector('#project-summary .edit-mode:not(.d-none)')) {
-                        initializeSummaryCalculations();
-                    }
-                });
-            });
-
-            // Initialize calculations if any fields are pre-filled
+            // Initialize calculations when page loads
             updateCostEstimationTotals();
             updateMiscEquipmentTotals();
             updateLaborCostTotals();

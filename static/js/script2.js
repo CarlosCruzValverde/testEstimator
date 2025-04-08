@@ -131,14 +131,14 @@ function calculateTotals() {
     });
 
     // Check if no AWG or Conduit fields are filled
-    if (!hasAWGData && !hasConduitData) {
+    /*if (!hasAWGData || !hasConduitData) {
         Swal.fire({
             icon: 'warning',
             title: 'Validation Error',
             text: 'Please fill out at least one AWG or Conduit field.',
         });
         return null; // Stop further execution
-    }
+    }*/
 
     // Display AWG and Conduit totals
     document.getElementById('awg-total').textContent = `Total AWG Cost: $${awgTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
