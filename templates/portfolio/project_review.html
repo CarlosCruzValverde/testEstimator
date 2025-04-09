@@ -855,7 +855,7 @@
                             <div class="highlight">Conduit</div>
                             <div id="conduit-base-cost" class="base-cost">${{ "%.2f"|format(summary.conduit_base_cost)
                                 }}</div>
-                            <div><input type="number" step="0.1" min="1.0" name="conduit_markup"
+                            <div><input type="number" step="0.01" min="1.0" name="conduit_markup"
                                     value="{{ summary.conduit_markup }}" class="form-control form-control-sm"></div>
                             <div class="sub">$<span id="conduit-subtotal">{{ "%.2f"|format(summary.conduit_subtotal)
                                     }}</span></div>
@@ -865,7 +865,7 @@
                             <div class="highlight">Miscellaneous</div>
                             <div id="misc-base-cost" class="base-cost">${{ "%.2f"|format(summary.misc_base_cost) }}
                             </div>
-                            <div><input type="number" step="0.1" min="1.0" name="misc_markup"
+                            <div><input type="number" step="0.01" min="1.0" name="misc_markup"
                                     value="{{ summary.misc_markup }}" class="form-control form-control-sm"></div>
                             <div class="sub">$<span id="misc-subtotal">{{ "%.2f"|format(summary.misc_subtotal) }}</span>
                             </div>
@@ -875,7 +875,7 @@
                             <div class="highlight">Equipment</div>
                             <div id="equipment-base-cost" class="base-cost">${{
                                 "%.2f"|format(summary.equipment_base_cost) }}</div>
-                            <div><input type="number" step="0.1" min="1.0" name="equipment_markup"
+                            <div><input type="number" step="0.01" min="1.0" name="equipment_markup"
                                     value="{{ summary.equipment_markup }}" class="form-control form-control-sm"></div>
                             <div class="sub">$<span id="equipment-subtotal">{{ "%.2f"|format(summary.equipment_subtotal)
                                     }}</span></div>
@@ -885,7 +885,7 @@
                             <div class="highlight">Labor</div>
                             <div id="labor-base-cost" class="base-cost">${{ "%.2f"|format(summary.labor_base_cost) }}
                             </div>
-                            <div><input type="number" step="0.1" min="1.0" name="labor_markup"
+                            <div><input type="number" step="0.01" min="1.0" name="labor_markup"
                                     value="{{ summary.labor_markup }}" class="form-control form-control-sm"></div>
                             <div class="sub">$<span id="labor-subtotal">{{ "%.2f"|format(summary.labor_subtotal)
                                     }}</span></div>
@@ -895,7 +895,7 @@
                             <div class="highlight">Low Voltage</div>
                             <div id="low-voltage-base-cost" class="base-cost">${{
                                 "%.2f"|format(summary.low_voltage_base_cost) }}</div>
-                            <div><input type="number" step="0.1" min="1.0" name="low_voltage_markup"
+                            <div><input type="number" step="0.01" min="1.0" name="low_voltage_markup"
                                     value="{{ summary.low_voltage_markup }}" class="form-control form-control-sm"></div>
                             <div class="sub">$<span id="low-voltage-subtotal">{{
                                     "%.2f"|format(summary.low_voltage_subtotal) }}</span></div>
@@ -906,7 +906,7 @@
                             <div class="highlight">Permits & Fees</div>
                             <div id="permits-base-cost" class="base-cost">${{ "%.2f"|format(summary.permits_base_cost)
                                 }}</div>
-                            <div><input type="number" step="0.1" min="1.0" name="permits_markup"
+                            <div><input type="number" step="0.01" min="1.0" name="permits_markup"
                                     value="{{ summary.permits_markup }}" class="form-control form-control-sm"></div>
                             <div class="sub">$<span id="permits-subtotal">{{ "%.2f"|format(summary.permits_subtotal)
                                     }}</span></div>
@@ -973,6 +973,22 @@
                                 }}</span></h2>
                     </div>
 
+                    <!-- Charger Information -->
+                    <div class="charger-info mb-3">
+                        <div class="charger-row mb-2">
+                            <label class="charger-label">Number of Chargers:</label>
+                            <input type="number" name="chargers_count"
+                                value="{{ project.labor_cost_estimations.first().chargers_count if project.labor_cost_estimations.first() else 0 }}"
+                                class="form-control form-control-sm d-inline-block w-auto">
+                        </div>
+                        <div class="charger-row mb-2">
+                            <label class="charger-label">Price Per Charger:</label>
+                            <input type="number" step="0.1" min="0" name="price_per_charger"
+                                value="{{ summary.price_per_charger if summary.price_per_charger else 0 }}"
+                                class="form-control form-control-sm d-inline-block w-auto">
+                        </div>
+                    </div>
+
                     <div class="approval-section">
                         <span class="approval-label">Approved:</span>
                         <div class="approval-options">
@@ -989,6 +1005,28 @@
                                 <span class="radio-text">No</span>
                             </label>
                         </div>
+                    </div>
+
+                    <!-- Total Submitted and Approved Amount -->
+                    <div class="summary-breakdown mb-3">
+                        <div class="breakdown-row mb-2">
+                            <label class="fw-bold">Total Submitted:</label>
+                            <input type="number" step="0.1" min="0" name="total_submitted"
+                                value="{{ summary.total_submitted if summary.total_submitted else 0 }}"
+                                class="form-control form-control-sm d-inline-block w-auto">
+                        </div>
+                        <div class="breakdown-row mb-2">
+                            <label class="fw-bold">Approved Amount:</label>
+                            <input type="number" step="0.1" min="0" name="approved_amount"
+                                value="{{ summary.approved_amount if summary.approved_amount else 0 }}"
+                                class="form-control form-control-sm d-inline-block w-auto">
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="notes-section mb-3">
+                        <label>Additional Notes:</label>
+                        <textarea name="notes" class="form-control">{{ summary.notes or '' }}</textarea>
                     </div>
 
                     <div class="text-end mt-3">
@@ -1043,7 +1081,7 @@
                 // Set up event listeners for summary calculations
                 const summarySection = document.getElementById('project-summary');
 
-                // Markup inputs
+                // Markup inputs - updated to match actual input names
                 summarySection.querySelectorAll('input[name="awg_markup"], input[name="conduit_markup"], input[name="misc_markup"], input[name="equipment_markup"], input[name="labor_markup"], input[name="low_voltage_markup"], input[name="permits_markup"]').forEach(input => {
                     input.addEventListener('input', calculateSummaryTotals);
                 });
@@ -1067,7 +1105,7 @@
                 calculateCategorySummary('misc');
                 calculateCategorySummary('equipment');
                 calculateCategorySummary('labor');
-                calculateCategorySummary('low-voltage');
+                calculateCategorySummary('low_voltage');
                 calculateCategorySummary('permits');
 
                 // Calculate totals
@@ -1076,17 +1114,31 @@
                 calculateSummaryGrandTotals();
             }
 
+            function formatCurrency(value) {
+                return parseFloat(value).toLocaleString('en-US', {
+                    style: 'decimal',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
             function calculateCategorySummary(category) {
                 const summarySection = document.getElementById('project-summary');
-                const baseCost = parseFloat(summarySection.querySelector(`#${category}-base-cost`).textContent.replace('$', '')) || 0;
+
+                // Handle the low_voltage and permits cases
+                const elementPrefix = category === 'low_voltage' ? 'low-voltage' :
+                    category === 'permits' ? 'permits' :
+                        category;
+
+                const baseCost = parseFloat(summarySection.querySelector(`#${elementPrefix}-base-cost`).textContent.replace(/[^0-9.-]/g, '')) || 0;
                 const markupInput = summarySection.querySelector(`input[name="${category}_markup"]`);
                 const markup = parseFloat(markupInput.value) || 1.0;
 
                 const subtotal = baseCost * markup;
                 const profit = subtotal - baseCost;
 
-                summarySection.querySelector(`#${category}-subtotal`).textContent = subtotal.toFixed(2);
-                summarySection.querySelector(`#${category}-profit`).textContent = profit.toFixed(2);
+                summarySection.querySelector(`#${elementPrefix}-subtotal`).textContent = formatCurrency(subtotal);
+                summarySection.querySelector(`#${elementPrefix}-profit`).textContent = formatCurrency(profit);
 
                 // Update total profit
                 updateTotalProfit();
@@ -1098,24 +1150,24 @@
                 let totalProfit = 0;
 
                 taxableCategories.forEach(category => {
-                    const profit = parseFloat(summarySection.querySelector(`#${category}-profit`).textContent) || 0;
+                    const profit = parseFloat(summarySection.querySelector(`#${category}-profit`).textContent.replace(/[^0-9.-]/g, '')) || 0;
                     totalProfit += profit;
                 });
 
-                summarySection.querySelector('#total-profit').textContent = totalProfit.toFixed(2);
+                summarySection.querySelector('#total-profit').textContent = formatCurrency(totalProfit);
             }
 
             function calculateSummaryIncomeTax() {
                 const summarySection = document.getElementById('project-summary');
                 const taxPercentage = parseFloat(summarySection.querySelector('input[name="tax_percentage"]').value) || 30;
-                const totalProfit = parseFloat(summarySection.querySelector('#total-profit').textContent) || 0;
+                const totalProfit = parseFloat(summarySection.querySelector('#total-profit').textContent.replace(/[^0-9.-]/g, '')) || 0;
                 const incomeTax = totalProfit * (taxPercentage / 100);
 
                 // Update displays
                 summarySection.querySelector('#tax-percentage-display').textContent = taxPercentage;
-                summarySection.querySelector('#tax-base-cost').textContent = totalProfit.toFixed(2);
-                summarySection.querySelector('#tax-subtotal').textContent = incomeTax.toFixed(2);
-                summarySection.querySelector('#tax-summary').textContent = incomeTax.toFixed(2);
+                summarySection.querySelector('#tax-base-cost').textContent = formatCurrency(totalProfit);
+                summarySection.querySelector('#tax-subtotal').textContent = formatCurrency(incomeTax);
+                summarySection.querySelector('#tax-summary').textContent = formatCurrency(incomeTax);
             }
 
             function calculateSummaryOverheadMargin() {
@@ -1124,7 +1176,7 @@
                 let grandSubtotal = 0;
 
                 overheadCategories.forEach(category => {
-                    const subtotal = parseFloat(summarySection.querySelector(`#${category}-subtotal`).textContent) || 0;
+                    const subtotal = parseFloat(summarySection.querySelector(`#${category}-subtotal`).textContent.replace(/[^0-9.-]/g, '')) || 0;
                     grandSubtotal += subtotal;
                 });
 
@@ -1133,9 +1185,9 @@
 
                 // Update displays
                 summarySection.querySelector('#overhead-percentage-display').textContent = overheadPercentage;
-                summarySection.querySelector('#overhead-base-cost').textContent = grandSubtotal.toFixed(2);
-                summarySection.querySelector('#overhead-subtotal').textContent = overheadMargin.toFixed(2);
-                summarySection.querySelector('#overhead-summary').textContent = overheadMargin.toFixed(2);
+                summarySection.querySelector('#overhead-base-cost').textContent = formatCurrency(grandSubtotal);
+                summarySection.querySelector('#overhead-subtotal').textContent = formatCurrency(overheadMargin);
+                summarySection.querySelector('#overhead-summary').textContent = formatCurrency(overheadMargin);
             }
 
             function calculateSummaryGrandTotals() {
@@ -1147,19 +1199,19 @@
                 // Calculate grand subtotal (without tax and overhead)
                 const mainCategories = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'low-voltage', 'permits'];
                 mainCategories.forEach(category => {
-                    const subtotal = parseFloat(summarySection.querySelector(`#${category}-subtotal`).textContent) || 0;
+                    const subtotal = parseFloat(summarySection.querySelector(`#${category}-subtotal`).textContent.replace(/[^0-9.-]/g, '')) || 0;
                     grandSubtotal += subtotal;
                 });
 
                 // Calculate grand total (including tax and overhead)
                 categories.forEach(category => {
-                    const subtotal = parseFloat(summarySection.querySelector(`#${category}-subtotal`).textContent) || 0;
+                    const subtotal = parseFloat(summarySection.querySelector(`#${category}-subtotal`).textContent.replace(/[^0-9.-]/g, '')) || 0;
                     grandTotal += subtotal;
                 });
 
                 // Update displays
-                summarySection.querySelector('#grand-subtotal').textContent = grandSubtotal.toFixed(2);
-                summarySection.querySelector('#grand-total').textContent = grandTotal.toFixed(2);
+                summarySection.querySelector('#grand-subtotal').textContent = formatCurrency(grandSubtotal);
+                summarySection.querySelector('#grand-total').textContent = formatCurrency(grandTotal);
             }
 
 
