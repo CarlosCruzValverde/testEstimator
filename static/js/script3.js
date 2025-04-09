@@ -131,14 +131,14 @@ function calculateTotals() {
     });
 
     // Check if no Miscellaneous or Equipment fields are filled
-    /*if (!hasMiscData || !hasEquipData) {
+    if (!hasMiscData && !hasEquipData) {
         Swal.fire({
             icon: 'warning',
             title: 'Validation Error',
             text: 'Please fill out at least one Miscellaneous or Equipment field.',
         });
         return null; // Stop further execution
-    }*/
+    }
 
     // Display Miscellaneous and Equipment totals
     document.getElementById('misc-total').textContent = `Total Miscellaneous Cost: $${miscTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
@@ -179,19 +179,32 @@ function calculateTotals() {
 // Function to validate fields
 function validateFields() {
     let isValid = true;
+    let hasAnyData = false;
 
     // Validate Miscellaneous fields
     document.querySelectorAll('#misc-fields .input-group').forEach(group => {
         const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
         const quantityInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
 
-        if ((costInput.value && !quantityInput.value) || (!costInput.value && quantityInput.value)) {
+        /*if ((costInput.value && !quantityInput.value) || (!costInput.value && quantityInput.value)) {
             isValid = false;
             Swal.fire({
                 icon: 'warning',
                 title: 'Validation Error',
                 text: `Please fill out both cost and quantity for ${group.querySelector('label').textContent}.`,
             });
+        }*/
+
+        if (costInput.value || quantityInput.value) {
+            hasAnyData = true;
+            if (!costInput.value || !quantityInput.value) {
+                isValid = false;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: `Please fill out both cost and quantity for ${group.querySelector('label').textContent}.`,
+                });
+            }
         }
     });
 
@@ -200,15 +213,37 @@ function validateFields() {
         const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
         const quantityInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
 
-        if ((costInput.value && !quantityInput.value) || (!costInput.value && quantityInput.value)) {
+        /*if ((costInput.value && !quantityInput.value) || (!costInput.value && quantityInput.value)) {
             isValid = false;
             Swal.fire({
                 icon: 'warning',
                 title: 'Validation Error',
                 text: `Please fill out both cost and quantity for ${group.querySelector('label').textContent}.`,
             });
+        }*/
+
+        if (costInput.value || quantityInput.value) {
+            hasAnyData = true;
+            if (!costInput.value || !quantityInput.value) {
+                isValid = false;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: `Please fill out both cost and quantity for ${group.querySelector('label').textContent}.`,
+                });
+            }
         }
     });
+
+    // MODIFIED VALIDATION: Only require data in at least one section
+    if (!hasAnyData) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Validation Error',
+            text: 'Please fill out at least one field in either the Miscellaneous OR Equipment section.',
+        });
+        return false;
+    }
 
     return isValid;
 }
