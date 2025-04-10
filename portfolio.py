@@ -563,12 +563,25 @@ def projects():
     
     # Get the year filter from request args (default to current year if not provided)
     year = request.args.get('year', type=int, default=current_year)
+    approval_status = request.args.get('approval', type=str)  # 'approved', 'not_approved', 'pending', or None
     
     # Base query for current user's projects
     query = Project.query.filter_by(user_id=session["user_id"])
     
     # Apply year filter (no need to check if year exists since we have a default)
     query = query.filter(db.extract('year', Project.start_date) == year)
+
+    # Apply approval status filter if specified
+    if approval_status:
+        # Join with ProjectSummary to filter by approval status
+        query = query.join(ProjectSummary)
+        
+        if approval_status == 'approved':
+            query = query.filter(ProjectSummary.approved == True)
+        elif approval_status == 'not_approved':
+            query = query.filter(ProjectSummary.approved == False)
+        elif approval_status == 'pending':
+            query = query.filter(ProjectSummary.approved.is_(None))
     
     # Order and execute query
     projects = query.order_by(Project.start_date.desc()).all()
@@ -621,9 +634,14 @@ def projects():
         }
         project_list.append(project_data)
     
-    return render_template("portfolio/listing_projects.html", 
-                           projects=project_list, years=year_list, 
-                           selected_year=year, current_year=current_year)
+    return render_template(
+        "portfolio/listing_projects.html", 
+        projects=project_list,
+        years=year_list,
+        selected_year=year,
+        current_year=current_year,
+        selected_approval=approval_status
+    )
 
 
 def get_latest_for_each_project(model, project_ids):

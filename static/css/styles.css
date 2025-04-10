@@ -921,6 +921,24 @@ header p {
     border: 1px solid #91d5ff;
 }
 
+.approval-filter {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 5px;
+}
+
+.approval-filter label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.approval-filter select {
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+}
+
 
 /* Animations */
 @keyframes fadeIn {
