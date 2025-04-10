@@ -685,7 +685,7 @@ def project_review(project_id):
         }
 
         # Handle Cost Estimation - Filter in Python
-        cost_estimation = project.cost_estimations.first()
+        cost_estimation = project.cost_estimations.order_by(CostEstimation.created_at.desc()).first()
         if cost_estimation:
             data['cost_estimation'] = {
                 'awg': [e for e in cost_estimation.entries if e.type == 'AWG'],
@@ -694,7 +694,7 @@ def project_review(project_id):
             }
 
         # Handle Misc Equipment - Filter in Python
-        misc_equipment = project.misc_equipment_estimations.first()
+        misc_equipment = project.misc_equipment_estimations.order_by(MiscEquipmentEstimation.created_at.desc()).first()
         if misc_equipment:
             data['misc_equipment'] = {
                 'misc': [e for e in misc_equipment.entries if e.type == 'Miscellaneous'],
@@ -703,22 +703,39 @@ def project_review(project_id):
             }
 
         # Handle Labor Cost
-        labor_cost = project.labor_cost_estimations.first()
+        labor_cost = project.labor_cost_estimations.order_by(LaborCostEstimation.created_at.desc()).first()
         if labor_cost:
             data['labor_cost'] = {
                 'entries': labor_cost.entries,  # Already a list
                 'main': labor_cost
             }
 
-        # Handle Summary
+        # Handle Summary - ensure we have one
         summary = project.summaries.first()
+        if not summary:
+            # Create a new summary if none exists
+            summary = ProjectSummary(project_id=project.id)
+            db.session.add(summary)
+            db.session.commit()
+
+        # Refresh base costs from related tables
+        _refresh_summary_base_costs(project, summary)
+        
+        # Recalculate all derived values
+        _recalculate_summary_totals(summary)
+        
+        # Commit any changes made to the summary
+        db.session.commit()
+        
         data['summary'] = summary
 
         return render_template("portfolio/project_review.html", **data, project_id=project_id)
 
     except Exception as e:
-        current_app.logger.error(f"Error loading project review: {str(e)}")
-        abort(500)
+        db.session.rollback()
+        current_app.logger.error(f"Error loading project review: {str(e)}", exc_info=True)
+        flash('Error loading project review', 'danger')
+        return redirect(url_for('portfolio.projects'))
 
 
 @bp.route("/update_basic_info/<int:project_id>", methods=["POST"])
@@ -802,7 +819,9 @@ def update_cost_estimation(project_id):
         cost_estimation.grand_total = grand_total
 
         current_app.logger.debug(f"New totals - AWG: {awg_total}, Conduit: {conduit_total}, Tax: {tax_amount}, Grand: {grand_total}")
-            
+
+        # In update_cost_estimation route, just before commit:
+        _refresh_summary_base_costs(project, project.summaries.first())  
         db.session.commit()
         flash('Cost estimation updated successfully!', 'success')
         return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='cost-estimation'))
@@ -865,6 +884,7 @@ def update_misc_equipment(project_id):
         misc_equip.tax_amount = tax_amount
         misc_equip.grand_total = grand_total
         
+        _refresh_summary_base_costs(project, project.summaries.first())
         db.session.commit()
         flash('Miscellaneous & Equipment updated successfully!', 'success')
         return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='misc-equipment'))
@@ -889,40 +909,52 @@ def update_labor_cost(project_id):
         project = Project.query.get_or_404(project_id)
         labor_cost = project.labor_cost_estimations.first()
         
-        if labor_cost:
-            labor_total = 0.0
-            
-            # Update labor entries with normalized values
-            for entry in labor_cost.entries:
-                entry.rate = normalize_float(request.form.get(f'rate_{entry.id}'))
-                entry.workers = int(request.form.get(f'workers_{entry.id}', 0))
-                entry.hours = normalize_float(request.form.get(f'hours_{entry.id}'))
-                entry.days = normalize_float(request.form.get(f'days_{entry.id}'))
-                entry.subtotal = normalize_float(entry.rate * entry.workers * entry.hours * entry.days)
-                labor_total += entry.subtotal
-            
-            # Update charger information
-            labor_cost.chargers_count = int(request.form.get('chargers_count', 0))
-            labor_cost.charger_price = normalize_float(request.form.get('charger_price', 0))
-            
-            # Calculate low voltage total (consistent with frontend calculation)
-            low_voltage_total = normalize_float(labor_cost.chargers_count * labor_cost.charger_price)
-            
-            # Calculate grand total
-            labor_cost.labor_total = labor_total
-            labor_cost.low_voltage_total = low_voltage_total
-            labor_cost.grand_total = normalize_float(labor_total + low_voltage_total)
-            
-            db.session.commit()
-            flash('Labor cost updated successfully!', 'success')
+        if not labor_cost:
+            flash('No labor cost estimation found for this project', 'danger')
+            return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='labor-cost'))
         
-        return redirect(url_for('portfolio.project_review', project_id=project_id))
+        labor_total = 0.0
+        
+        # Update labor entries with normalized values
+        for entry in labor_cost.entries:
+            rate = normalize_float(request.form.get(f'rate_{entry.id}'))
+            workers = int(request.form.get(f'workers_{entry.id}', 0))
+            hours = normalize_float(request.form.get(f'hours_{entry.id}'))
+            days = normalize_float(request.form.get(f'days_{entry.id}'))
+            
+            entry.rate = rate
+            entry.workers = workers
+            entry.hours = hours
+            entry.days = days
+            entry.subtotal = normalize_float(rate * workers * hours * days)
+            entry.notes = request.form.get(f'notes_{entry.id}', entry.notes or '')
+            labor_total += entry.subtotal
+        
+        # Update charger information
+        chargers_count = int(request.form.get('chargers_count', 0))
+        charger_price = normalize_float(request.form.get('charger_price', 0))
+        
+        # Calculate totals
+        low_voltage_total = normalize_float(chargers_count * charger_price)
+        grand_total = normalize_float(labor_total + low_voltage_total)
+        
+        # Update model
+        labor_cost.chargers_count = chargers_count
+        labor_cost.charger_price = charger_price
+        labor_cost.labor_total = labor_total
+        labor_cost.low_voltage_total = low_voltage_total
+        labor_cost.grand_total = grand_total
+        
+        _refresh_summary_base_costs(project, project.summaries.first())
+        db.session.commit()
+        flash('Labor cost updated successfully!', 'success')
+        return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='labor-cost'))
     
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"Error updating labor cost: {str(e)}")
-        flash('Error updating labor cost', 'danger')
-        return redirect(url_for('portfolio.project_review', project_id=project_id))
+        current_app.logger.error(f"Error updating labor cost: {str(e)}", exc_info=True)
+        flash(f'Error updating labor cost: {str(e)}', 'danger')
+        return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='labor-cost'))
     
 
 @bp.route("/update_summary/<int:project_id>", methods=["POST"])
@@ -948,7 +980,36 @@ def update_summary(project_id):
         
         if not summary:
             flash('No project summary found', 'danger')
-            return redirect(url_for('portfolio.project_review', project_id=project_id))
+            return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='project-summary'))
+
+        # Refresh base costs from related tables before updating
+        _refresh_summary_base_costs(project, summary)
+        """Refresh all base costs in project summary from related estimation tables"""
+        # Refresh from cost_estimations (AWG and Conduit)
+        cost_estimation = project.cost_estimations.order_by(CostEstimation.created_at.desc()).first()
+        if cost_estimation:
+            summary.awg_base_cost = cost_estimation.awg_total or 0
+            summary.conduit_base_cost = cost_estimation.conduit_total or 0
+            current_app.logger.debug(f"Updated AWG base: {summary.awg_base_cost}, Conduit base: {summary.conduit_base_cost}")
+
+        # Refresh from misc_equipment_estimations
+        misc_equipment = project.misc_equipment_estimations.order_by(MiscEquipmentEstimation.created_at.desc()).first()
+        if misc_equipment:
+            summary.misc_base_cost = misc_equipment.misc_total or 0
+            summary.equipment_base_cost = misc_equipment.equipment_total or 0
+            current_app.logger.debug(f"Updated Misc base: {summary.misc_base_cost}, Equipment base: {summary.equipment_base_cost}")
+
+        # Refresh from labor_cost_estimations
+        labor_cost = project.labor_cost_estimations.order_by(LaborCostEstimation.created_at.desc()).first()
+        if labor_cost:
+            summary.labor_base_cost = labor_cost.labor_total or 0
+            summary.low_voltage_base_cost = labor_cost.low_voltage_total or 0
+            current_app.logger.debug(f"Updated Labor base: {summary.labor_base_cost}, Low Voltage base: {summary.low_voltage_base_cost}")
+
+        # Ensure we have the latest charger info
+        if labor_cost:
+            summary.chargers_count = labor_cost.chargers_count or 0
+            summary.price_per_charger = labor_cost.charger_price or 0
 
         # Update markups and percentages
         summary.awg_markup = validate_positive_float(request.form.get('awg_markup'), "AWG markup", min_value=1.0)
@@ -964,26 +1025,13 @@ def update_summary(project_id):
 
         # Update approval status
         summary.approved = request.form.get('approved') == 'true'
+        summary.total_submitted = validate_positive_float(request.form.get('total_submitted', 0))
+        summary.approved_amount = validate_positive_float(request.form.get('approved_amount', 0))
+        summary.price_per_charger = validate_positive_float(request.form.get('price_per_charger', 0))
+        summary.notes = request.form.get('notes', '')
 
         # Recalculate all values
-        summary.awg_subtotal = round(summary.awg_base_cost * summary.awg_markup, 2)
-        summary.awg_profit = round(summary.awg_subtotal - summary.awg_base_cost, 2)
-        
-        # Calculate all other categories similarly...
-        
-        # Calculate totals
-        taxable_profit = (summary.awg_profit + summary.conduit_profit + summary.misc_profit + 
-                         summary.equipment_profit + summary.labor_profit + summary.low_voltage_profit + 
-                         summary.permits_profit)
-        
-        summary.tax_subtotal = round(taxable_profit * (summary.tax_percentage / 100), 2)
-        
-        grand_subtotal = (summary.awg_subtotal + summary.conduit_subtotal + summary.misc_subtotal + 
-                         summary.equipment_subtotal + summary.labor_subtotal + summary.low_voltage_subtotal + 
-                         summary.permits_subtotal)
-        
-        summary.overhead_subtotal = round(grand_subtotal * (summary.overhead_percentage / 100), 2)
-        summary.grand_total = round(grand_subtotal + summary.tax_subtotal + summary.overhead_subtotal, 2)
+        _recalculate_summary_totals(summary)
 
         db.session.commit()
         flash('Project summary updated successfully!', 'success')
@@ -994,7 +1042,70 @@ def update_summary(project_id):
         current_app.logger.warning(f"Validation failed in summary update: {str(e)}")
     except Exception as e:
         db.session.rollback()
-        flash('Error updating project summary', 'danger')
+        flash(f'Error updating project summary: {str(e)}', 'danger')
         current_app.logger.error(f"Error updating project summary: {str(e)}", exc_info=True)
     
-    return redirect(url_for('portfolio.project_review', project_id=project_id))
+    return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='project-summary'))
+
+def _refresh_summary_base_costs(project, summary):
+    """Refresh base costs from related tables"""
+    # Get latest cost estimation
+    cost_estimation = project.cost_estimations.first()
+    if cost_estimation:
+        summary.awg_base_cost = cost_estimation.awg_total or 0
+        summary.conduit_base_cost = cost_estimation.conduit_total or 0
+    
+    # Get latest misc equipment estimation
+    misc_equipment = project.misc_equipment_estimations.first()
+    if misc_equipment:
+        summary.misc_base_cost = misc_equipment.misc_total or 0
+        summary.equipment_base_cost = misc_equipment.equipment_total or 0
+    
+    # Get latest labor cost estimation
+    labor_cost = project.labor_cost_estimations.first()
+    if labor_cost:
+        summary.labor_base_cost = labor_cost.labor_total or 0
+        summary.low_voltage_base_cost = labor_cost.low_voltage_total or 0
+        summary.chargers_count = labor_cost.chargers_count or 0
+        summary.price_per_charger = labor_cost.charger_price or 0
+
+def _recalculate_summary_totals(summary):
+    """Recalculate all derived values in the summary"""
+    # Calculate category subtotals and profits
+    summary.awg_subtotal = round(summary.awg_base_cost * summary.awg_markup, 2)
+    summary.awg_profit = round(summary.awg_subtotal - summary.awg_base_cost, 2)
+    
+    summary.conduit_subtotal = round(summary.conduit_base_cost * summary.conduit_markup, 2)
+    summary.conduit_profit = round(summary.conduit_subtotal - summary.conduit_base_cost, 2)
+    
+    summary.misc_subtotal = round(summary.misc_base_cost * summary.misc_markup, 2)
+    summary.misc_profit = round(summary.misc_subtotal - summary.misc_base_cost, 2)
+    
+    summary.equipment_subtotal = round(summary.equipment_base_cost * summary.equipment_markup, 2)
+    summary.equipment_profit = round(summary.equipment_subtotal - summary.equipment_base_cost, 2)
+    
+    summary.labor_subtotal = round(summary.labor_base_cost * summary.labor_markup, 2)
+    summary.labor_profit = round(summary.labor_subtotal - summary.labor_base_cost, 2)
+    
+    summary.low_voltage_subtotal = round(summary.low_voltage_base_cost * summary.low_voltage_markup, 2)
+    summary.low_voltage_profit = round(summary.low_voltage_subtotal - summary.low_voltage_base_cost, 2)
+    
+    summary.permits_subtotal = round(summary.permits_base_cost * summary.permits_markup, 2)
+    summary.permits_profit = round(summary.permits_subtotal - summary.permits_base_cost, 2)
+    
+    # Calculate totals
+    taxable_profit = (summary.awg_profit + summary.conduit_profit + summary.misc_profit + 
+                     summary.equipment_profit + summary.labor_profit + summary.low_voltage_profit + 
+                     summary.permits_profit)
+    
+    summary.tax_base_cost = taxable_profit
+    summary.tax_subtotal = round(taxable_profit * (summary.tax_percentage / 100), 2)
+    
+    grand_subtotal = (summary.awg_subtotal + summary.conduit_subtotal + summary.misc_subtotal + 
+                     summary.equipment_subtotal + summary.labor_subtotal + summary.low_voltage_subtotal + 
+                     summary.permits_subtotal)
+    
+    summary.grand_subtotal = grand_subtotal
+    summary.overhead_base_cost = grand_subtotal
+    summary.overhead_subtotal = round(grand_subtotal * (summary.overhead_percentage / 100), 2)
+    summary.grand_total = round(grand_subtotal + summary.tax_subtotal + summary.overhead_subtotal, 2)

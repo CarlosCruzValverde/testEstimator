@@ -928,8 +928,7 @@
                             <div><input type="number" step="1" min="0" name="tax_percentage"
                                     value="{{ summary.tax_percentage }}"
                                     class="form-control form-control-sm"><span>%</span></div>
-                            <div class="sub">$<span id="tax-subtotal">{{ "%.2f"|format(summary.tax_subtotal) }}</span>
-                            </div>
+                            <div></div>
                             <div></div>
 
                             <!-- Overhead Margin Row -->
@@ -1086,10 +1085,14 @@
                     input.addEventListener('input', calculateSummaryTotals);
                 });
 
-                // Percentage inputs
-                summarySection.querySelectorAll('input[name="tax_percentage"], input[name="overhead_percentage"]').forEach(input => {
-                    input.addEventListener('input', calculateSummaryTotals);
+                // Tax percentage input (special case - needs to update both tax displays and grand total)
+                summarySection.querySelector('input[name="tax_percentage"]').addEventListener('input', function () {
+                    calculateSummaryIncomeTax();
+                    calculateSummaryGrandTotals(); // Since tax affects grand total
                 });
+
+                // Percentage inputs (overhead)
+                summarySection.querySelector('input[name="overhead_percentage"]').addEventListener('input', calculateSummaryTotals);
 
                 // Initial calculation
                 calculateSummaryTotals();
@@ -1163,11 +1166,16 @@
                 const totalProfit = parseFloat(summarySection.querySelector('#total-profit').textContent.replace(/[^0-9.-]/g, '')) || 0;
                 const incomeTax = totalProfit * (taxPercentage / 100);
 
-                // Update displays
+                // Format the tax amount as currency
+                const formattedTax = formatCurrency(incomeTax);
+
+                // Update BOTH tax displays with the same value
+                summarySection.querySelector('#tax-subtotal').textContent = formattedTax;
+                summarySection.querySelector('#tax-summary').textContent = formattedTax;
+
+                // Update percentage display and base cost
                 summarySection.querySelector('#tax-percentage-display').textContent = taxPercentage;
                 summarySection.querySelector('#tax-base-cost').textContent = formatCurrency(totalProfit);
-                summarySection.querySelector('#tax-subtotal').textContent = formatCurrency(incomeTax);
-                summarySection.querySelector('#tax-summary').textContent = formatCurrency(incomeTax);
             }
 
             function calculateSummaryOverheadMargin() {
