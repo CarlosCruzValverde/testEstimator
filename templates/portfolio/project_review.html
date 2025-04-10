@@ -904,8 +904,8 @@
 
                             <!-- Permits & Fees Row -->
                             <div class="highlight">Permits & Fees</div>
-                            <div id="permits-base-cost" class="base-cost">${{ "%.2f"|format(summary.permits_base_cost)
-                                }}</div>
+                            <div><input type="number" step="0.1" min="0" name="permits_base_cost"
+                                    value="{{ summary.permits_base_cost }}" class="form-control form-control-sm"></div>
                             <div><input type="number" step="0.01" min="1.0" name="permits_markup"
                                     value="{{ summary.permits_markup }}" class="form-control form-control-sm"></div>
                             <div class="sub">$<span id="permits-subtotal">{{ "%.2f"|format(summary.permits_subtotal)
