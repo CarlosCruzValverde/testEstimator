@@ -191,7 +191,7 @@
                                     <tr>
                                         <td>{{ entry.name }}</td>
                                         <td>{{ entry.cost | currency }}</td>
-                                        <td>{{ "%.2f"|format(entry.length) }}</td>
+                                        <td>{{ entry.length }}</td>
                                         <td>{{ entry.subtotal | currency }}</td>
                                     </tr>
                                     {% endfor %}
@@ -214,7 +214,7 @@
                                     <tr>
                                         <td>{{ entry.name }}</td>
                                         <td>{{ entry.cost | currency }}</td>
-                                        <td>{{ "%.2f"|format(entry.length) }}</td>
+                                        <td>{{ entry.length }}</td>
                                         <td>{{ entry.subtotal | currency }}</td>
                                     </tr>
                                     {% endfor %}
@@ -264,11 +264,11 @@
                                     <tr>
                                         <td>{{ entry.name }}</td>
                                         <td>
-                                            <input type="number" step="0.01" name="awg_cost_{{ entry.id }}"
+                                            <input type="number" step="0.1" name="awg_cost_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="0.01" name="awg_length_{{ entry.id }}"
+                                            <input type="number" step="1" name="awg_length_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.length }}">
                                         </td>
                                         <td class="subtotal">${{ "%.2f"|format(entry.subtotal) }}</td>
@@ -293,11 +293,11 @@
                                     <tr>
                                         <td>{{ entry.name }}</td>
                                         <td>
-                                            <input type="number" step="0.01" name="conduit_cost_{{ entry.id }}"
+                                            <input type="number" step="0.1" name="conduit_cost_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="0.01" name="conduit_length_{{ entry.id }}"
+                                            <input type="number" step="1" name="conduit_length_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.length }}">
                                         </td>
                                         <td class="subtotal">${{ "%.2f"|format(entry.subtotal) }}</td>
@@ -447,7 +447,7 @@
                                     <tr>
                                         <td>{{ entry.name }}</td>
                                         <td>
-                                            <input type="number" step="0.01" name="misc_cost_{{ entry.id }}"
+                                            <input type="number" step="0.1" name="misc_cost_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
@@ -605,7 +605,7 @@
                             <tr>
                                 <td>{{ entry.position }}</td>
                                 <td>
-                                    <input type="number" step="0.01" name="rate_{{ entry.id }}"
+                                    <input type="number" step="0.1" name="rate_{{ entry.id }}"
                                         class="form-control form-control-sm" value="{{ entry.rate }}">
                                 </td>
                                 <td>
@@ -617,7 +617,7 @@
                                         class="form-control form-control-sm" value="{{ entry.hours }}">
                                 </td>
                                 <td>
-                                    <input type="number" step="0.1" name="days_{{ entry.id }}"
+                                    <input type="number" step="1" name="days_{{ entry.id }}"
                                         class="form-control form-control-sm" value="{{ entry.days }}">
                                 </td>
                                 <td class="subtotal">${{ "%.2f"|format(entry.subtotal) }}</td>

@@ -788,7 +788,7 @@ header p {
 /* Highlight active edit section */
 
 .card {
-    flex: 1 0 90%;
+    flex: 1 0 100%;
     /* Adjust the flex properties to your needs */
 }
 
