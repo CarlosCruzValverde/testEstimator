@@ -715,12 +715,12 @@ def update_cost_estimation(project_id):
             for entry in cost_estimation.entries:
                 if entry.type == 'AWG':
                     entry.cost = normalize_float(request.form.get(f'awg_cost_{entry.id}'))
-                    entry.length = normalize_float(request.form.get(f'awg_length_{entry.id}'))
+                    entry.length = int(request.form.get(f'awg_length_{entry.id}', 0))
                     entry.subtotal = normalize_float(entry.cost * entry.length)
                     awg_total += entry.subtotal
                 elif entry.type == 'Conduit':
                     entry.cost = normalize_float(request.form.get(f'conduit_cost_{entry.id}'))
-                    entry.length = normalize_float(request.form.get(f'conduit_length_{entry.id}'))
+                    entry.length = int(request.form.get(f'conduit_length_{entry.id}', 0))
                     entry.subtotal = normalize_float(entry.cost * entry.length)
                     conduit_total += entry.subtotal
             
@@ -769,12 +769,12 @@ def update_misc_equipment(project_id):
             for entry in misc_equip.entries:
                 if entry.type == 'Miscellaneous':
                     entry.cost = normalize_float(request.form.get(f'misc_cost_{entry.id}'))
-                    entry.quantity = normalize_float(request.form.get(f'misc_quantity_{entry.id}'))
+                    entry.quantity = int(request.form.get(f'misc_quantity_{entry.id}', 0))
                     entry.subtotal = normalize_float(entry.cost * entry.quantity)
                     misc_total += entry.subtotal
                 elif entry.type == 'Equipment':
                     entry.cost = normalize_float(request.form.get(f'equipment_cost_{entry.id}'))
-                    entry.quantity = normalize_float(request.form.get(f'equipment_quantity_{entry.id}'))
+                    entry.quantity = int(request.form.get(f'equipment_quantity_{entry.id}', 0))
                     entry.subtotal = normalize_float(entry.cost * entry.quantity)
                     equipment_total += entry.subtotal
             
