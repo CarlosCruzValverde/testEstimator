@@ -1,37 +1,50 @@
 {% extends "layout.html" %}
 
 {% block main %}
-<div class="year-filter">
-    <form method="get" action="{{ url_for('portfolio.projects') }}">
-        <label for="year">Filter by Year:</label>
-        <select name="year" id="year" onchange="this.form.submit()">
-            {% for year in years %}
-            <option value="{{ year }}" {% if selected_year==year %}selected{% endif %}>
-                {{ year }}
-            </option>
-            {% endfor %}
-        </select>
+<div class="container-fluid mb-4">
+    <div class="row align-items-center">
+        <!-- Year Filter -->
+        <div class="col-md-6">
+            <form method="get" action="{{ url_for('portfolio.projects') }}" class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <label for="year" class="col-form-label">Filter by Year:</label>
+                </div>
+                <div class="col-auto">
+                    <select name="year" id="year" class="form-select" onchange="this.form.submit()">
+                        {% for year in years %}
+                        <option value="{{ year }}" {% if selected_year==year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if selected_year == current_year %}
+                <div class="col-auto">
+                    <span class="badge bg-info">Current Year</span>
+                </div>
+                {% endif %}
+            </form>
+        </div>
 
-        <!-- Add a subtle indicator when viewing current year -->
-        {% if selected_year == current_year %}
-        <span class="current-year-badge">Viewing current year</span>
-        {% endif %}
-    </form>
-</div>
-
-<div class="approval-filter">
-    <form method="get" action="{{ url_for('portfolio.projects') }}">
-        <input type="hidden" name="year" value="{{ selected_year if selected_year else '' }}">
-
-        <label for="approval">Approval Status:</label>
-        <select name="approval" id="approval" onchange="this.form.submit()">
-            <option value="">All Statuses</option>
-            <option value="approved" {% if selected_approval=='approved' %}selected{% endif %}>Approved</option>
-            <option value="not_approved" {% if selected_approval=='not_approved' %}selected{% endif %}>Not Approved
-            </option>
-            <option value="pending" {% if selected_approval=='pending' %}selected{% endif %}>Pending</option>
-        </select>
-    </form>
+        <!-- Approval Filter -->
+        <div class="col-md-6">
+            <form method="get" action="{{ url_for('portfolio.projects') }}" class="row g-2 align-items-center">
+                <input type="hidden" name="year" value="{{ selected_year if selected_year else '' }}">
+                <div class="col-auto">
+                    <label for="approval" class="col-form-label">Approval Status:</label>
+                </div>
+                <div class="col-auto">
+                    <select name="approval" id="approval" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Statuses</option>
+                        <option value="approved" {% if selected_approval=='approved' %}selected{% endif %}>Approved
+                        </option>
+                        <option value="not_approved" {% if selected_approval=='not_approved' %}selected{% endif %}>
+                            Rejected</option>
+                        <option value="pending" {% if selected_approval=='pending' %}selected{% endif %}>Pending
+                        </option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <div class="container">
