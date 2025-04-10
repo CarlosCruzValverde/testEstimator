@@ -2,7 +2,17 @@
 document.getElementById('miscEquipmentForm').addEventListener('submit', function (event) {
     event.preventDefault(); // Prevent form submission
 
-    // Validate fields before proceeding
+    // First check if at least one section has data
+    if (!hasDataInEitherSection()) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Validation Error',
+            text: 'Please fill out at least one field in either the Miscellaneous OR Equipment section.',
+        });
+        return;
+    }
+
+    // Then validate the individual fields
     if (!validateFields()) {
         return; // Stop submission if validation fails
     }
@@ -13,14 +23,37 @@ document.getElementById('miscEquipmentForm').addEventListener('submit', function
     }
 });
 
+// New helper function to check if either section has data
+function hasDataInEitherSection() {
+    // Check Miscellaneous fields
+    let hasMiscData = false;
+    document.querySelectorAll('#misc-fields .input-group').forEach(group => {
+        const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
+        const quantityInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
+
+        if (costInput.value || quantityInput.value) {
+            hasMiscData = true;
+        }
+    });
+
+    // Check Equipment fields
+    let hasEquipData = false;
+    document.querySelectorAll('#equipment-fields .input-group').forEach(group => {
+        const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
+        const quantityInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
+
+        if (costInput.value || quantityInput.value) {
+            hasEquipData = true;
+        }
+    });
+
+    return hasMiscData || hasEquipData;
+}
 
 // Function to calculate subtotals and totals
 function calculateTotals() {
-
     let miscTotal = 0;
     let equipmentTotal = 0;
-    let hasMiscData = false; // Flag to check if any Miscellaneous field is filled
-    let hasEquipData = false; // Flag to check if any Equipment field is filled
 
     // Collect Miscellaneous data
     const miscData = [];
@@ -33,13 +66,10 @@ function calculateTotals() {
         // Determine the name value
         let name;
         if (nameInput) {
-            // If an editable text input exists, use its value
             name = nameInput.value.trim();
         } else if (nameLabel) {
-            // If a fixed label exists, use its text content
             name = nameLabel.textContent.trim();
         } else {
-            // If neither exists, log an error and skip this group
             console.error("Name field not found in the Miscellaneous group:", group);
             return;
         }
@@ -57,11 +87,6 @@ function calculateTotals() {
         const cost = parseFloat(costInput.value) || 0;
         const quantity = parseFloat(quantityInput.value) || 0;
         const subtotal = cost * quantity;
-
-        // Check if at least one Miscellaneous field is filled
-        if (cost > 0 || quantity > 0) {
-            hasMiscData = true;
-        }
 
         subtotalElement.textContent = `Subtotal: $${subtotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
         miscTotal += subtotal;
@@ -86,13 +111,10 @@ function calculateTotals() {
         // Determine the name value
         let name;
         if (nameInput) {
-            // If an editable text input exists, use its value
             name = nameInput.value.trim();
         } else if (nameLabel) {
-            // If a fixed label exists, use its text content
             name = nameLabel.textContent.trim();
         } else {
-            // If neither exists, log an error and skip this group
             console.error("Name field not found in the Equipment group:", group);
             return;
         }
@@ -102,21 +124,14 @@ function calculateTotals() {
         const quantityInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
         const subtotalElement = group.querySelector('.subtotal');
 
-        // Check if all required elements are found
         if (!costInput || !quantityInput || !subtotalElement) {
             console.error("One or more elements not found in the Equipment group:", group);
-            return; // Skip this group if any element is missing
+            return;
         }
 
-        // Get the values from the inputs
         const cost = parseFloat(costInput.value) || 0;
         const quantity = parseFloat(quantityInput.value) || 0;
         const subtotal = cost * quantity;
-
-        // Check if at least one Equipment field is filled
-        if (cost > 0 || quantity > 0) {
-            hasEquipData = true;
-        }
 
         subtotalElement.textContent = `Subtotal: $${subtotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
         equipmentTotal += subtotal;
@@ -129,16 +144,6 @@ function calculateTotals() {
             subtotal: subtotal.toFixed(2),
         });
     });
-
-    // Check if no Miscellaneous or Equipment fields are filled
-    if (!hasMiscData && !hasEquipData) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Validation Error',
-            text: 'Please fill out at least one Miscellaneous or Equipment field.',
-        });
-        return null; // Stop further execution
-    }
 
     // Display Miscellaneous and Equipment totals
     document.getElementById('misc-total').textContent = `Total Miscellaneous Cost: $${miscTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
@@ -163,7 +168,7 @@ function calculateTotals() {
 
     // Return form data
     return {
-        project_id: projectId, // Include project_id
+        project_id: projectId,
         miscData: miscData,
         equipmentData: equipmentData,
         tax: tax,
@@ -179,24 +184,14 @@ function calculateTotals() {
 // Function to validate fields
 function validateFields() {
     let isValid = true;
-    let hasAnyData = false;
 
     // Validate Miscellaneous fields
     document.querySelectorAll('#misc-fields .input-group').forEach(group => {
         const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
         const quantityInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
 
-        /*if ((costInput.value && !quantityInput.value) || (!costInput.value && quantityInput.value)) {
-            isValid = false;
-            Swal.fire({
-                icon: 'warning',
-                title: 'Validation Error',
-                text: `Please fill out both cost and quantity for ${group.querySelector('label').textContent}.`,
-            });
-        }*/
-
+        // Only validate if at least one field has data
         if (costInput.value || quantityInput.value) {
-            hasAnyData = true;
             if (!costInput.value || !quantityInput.value) {
                 isValid = false;
                 Swal.fire({
@@ -213,17 +208,8 @@ function validateFields() {
         const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
         const quantityInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
 
-        /*if ((costInput.value && !quantityInput.value) || (!costInput.value && quantityInput.value)) {
-            isValid = false;
-            Swal.fire({
-                icon: 'warning',
-                title: 'Validation Error',
-                text: `Please fill out both cost and quantity for ${group.querySelector('label').textContent}.`,
-            });
-        }*/
-
+        // Only validate if at least one field has data
         if (costInput.value || quantityInput.value) {
-            hasAnyData = true;
             if (!costInput.value || !quantityInput.value) {
                 isValid = false;
                 Swal.fire({
@@ -234,16 +220,6 @@ function validateFields() {
             }
         }
     });
-
-    // MODIFIED VALIDATION: Only require data in at least one section
-    if (!hasAnyData) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Validation Error',
-            text: 'Please fill out at least one field in either the Miscellaneous OR Equipment section.',
-        });
-        return false;
-    }
 
     return isValid;
 }

@@ -2,6 +2,16 @@
 document.getElementById('awgConduitForm').addEventListener('submit', function (event) {
     event.preventDefault(); // Prevent form submission
 
+    // First check if at least one section has data
+    if (!hasDataInEitherSection()) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Validation Error',
+            text: 'Please fill out at least one field in either the AWG OR Conduit section.',
+        });
+        return;
+    }
+
     // Validate fields before proceeding
     if (!validateFields()) {
         return; // Stop submission if validation fails
@@ -13,14 +23,80 @@ document.getElementById('awgConduitForm').addEventListener('submit', function (e
     }
 });
 
+// New helper function to check if either section has data
+function hasDataInEitherSection() {
+    // Check AWG fields
+    let hasAWGData = false;
+    document.querySelectorAll('#awg-fields .input-group').forEach(group => {
+        const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
+        const lengthInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
+
+        if (costInput.value || lengthInput.value) {
+            hasAWGData = true;
+        }
+    });
+
+    // Check Conduit fields
+    let hasConduitData = false;
+    document.querySelectorAll('#conduit-fields .input-group').forEach(group => {
+        const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
+        const lengthInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
+
+        if (costInput.value || lengthInput.value) {
+            hasConduitData = true;
+        }
+    });
+
+    return hasAWGData || hasConduitData;
+}
+
+// Modified validateFields to only check complete pairs where data exists
+function validateFields() {
+    let isValid = true;
+
+    // Validate AWG fields
+    document.querySelectorAll('#awg-fields .input-group').forEach(group => {
+        const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
+        const lengthInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
+
+        // Only validate if at least one field has data
+        if (costInput.value || lengthInput.value) {
+            if (!costInput.value || !lengthInput.value) {
+                isValid = false;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: `Please fill out both cost and length for ${group.querySelector('label').textContent}.`,
+                });
+            }
+        }
+    });
+
+    // Validate Conduit fields
+    document.querySelectorAll('#conduit-fields .input-group').forEach(group => {
+        const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
+        const lengthInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
+
+        // Only validate if at least one field has data
+        if (costInput.value || lengthInput.value) {
+            if (!costInput.value || !lengthInput.value) {
+                isValid = false;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: `Please fill out both cost and length for ${group.querySelector('label').textContent}.`,
+                });
+            }
+        }
+    });
+
+    return isValid;
+}
 
 // Function to calculate subtotals and totals
 function calculateTotals() {
-
     let awgTotal = 0;
     let conduitTotal = 0;
-    let hasAWGData = false; // Flag to check if any AWG field is filled
-    let hasConduitData = false; // Flag to check if any Conduit field is filled
 
     // Collect AWG data
     const awgData = [];
@@ -130,16 +206,6 @@ function calculateTotals() {
         });
     });
 
-    // Check if no AWG or Conduit fields are filled
-    /*if (!hasAWGData || !hasConduitData) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Validation Error',
-            text: 'Please fill out at least one AWG or Conduit field.',
-        });
-        return null; // Stop further execution
-    }*/
-
     // Display AWG and Conduit totals
     document.getElementById('awg-total').textContent = `Total AWG Cost: $${awgTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
     document.getElementById('conduit-total').textContent = `Total Conduit Cost: $${conduitTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
@@ -176,42 +242,6 @@ function calculateTotals() {
     };
 }
 
-// Function to validate fields
-function validateFields() {
-    let isValid = true;
-
-    // Validate AWG fields
-    document.querySelectorAll('#awg-fields .input-group').forEach(group => {
-        const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
-        const lengthInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
-
-        if ((costInput.value && !lengthInput.value) || (!costInput.value && lengthInput.value)) {
-            isValid = false;
-            Swal.fire({
-                icon: 'warning',
-                title: 'Validation Error',
-                text: `Please fill out both cost and length for ${group.querySelector('label').textContent}.`,
-            });
-        }
-    });
-
-    // Validate Conduit fields
-    document.querySelectorAll('#conduit-fields .input-group').forEach(group => {
-        const costInput = group.querySelector('.input-row .input-with-label:first-child input[type="number"]');
-        const lengthInput = group.querySelector('.input-row .input-with-label:last-child input[type="number"]');
-
-        if ((costInput.value && !lengthInput.value) || (!costInput.value && lengthInput.value)) {
-            isValid = false;
-            Swal.fire({
-                icon: 'warning',
-                title: 'Validation Error',
-                text: `Please fill out both cost and length for ${group.querySelector('label').textContent}.`,
-            });
-        }
-    });
-
-    return isValid;
-}
 
 // Function to submit form data to Flask
 function submitFormData(formData) {

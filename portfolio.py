@@ -82,23 +82,27 @@ def estimate_awg_cond():
         if not data:
             return jsonify({'success': False, 'message': 'No data provided'}), 400
 
-        # Extract fields from the JSON data
+        # Extract fields from the JSON data with defaults
         project_id = data.get('project_id')
-        awg_data = data.get('awgData')
-        conduit_data = data.get('conduitData')
-        tax = data.get('tax')
-        tax_amount = data.get('taxAmount')
-        grand_total = data.get('grandTotal')
-        awg_total = data.get('awgTotal')  # New: Get AWG total
-        conduit_total = data.get('conduitTotal')  # New: Get Conduit total
-        notes_awg = data.get('notes_awg')
-        notes_conduit = data.get('notes_conduit')
+        awg_data = data.get('awgData', [])  # Default to empty list
+        conduit_data = data.get('conduitData', [])  # Default to empty list
+        tax = data.get('tax', 0)  # Default to 0
+        tax_amount = data.get('taxAmount', 0)  # Default to 0
+        grand_total = data.get('grandTotal', 0)  # Default to 0
+        awg_total = data.get('awgTotal', 0)  # Default to 0
+        conduit_total = data.get('conduitTotal', 0)  # Default to 0
+        notes_awg = data.get('notes_awg', '')  # Default to empty string
+        notes_conduit = data.get('notes_conduit', '')  # Default to empty string
 
-        # Validate required fields
-        if not all([project_id, awg_data, conduit_data, tax, tax_amount, grand_total, awg_total, conduit_total]):
-            return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+        # Validate required fields - project_id is the only truly required field
+        if not project_id:
+            return jsonify({'success': False, 'message': 'Project ID is required'}), 400
 
-        # Validate AWG and Conduit data
+        # Validate that at least one section has data
+        if not awg_data and not conduit_data:
+            return jsonify({'success': False, 'message': 'At least one section (AWG or Conduit) must have data'}), 400
+
+        # Validate data formats
         if not isinstance(awg_data, list) or not isinstance(conduit_data, list):
             return jsonify({'success': False, 'message': 'Invalid data format for AWG or Conduit'}), 400
 
@@ -113,36 +117,36 @@ def estimate_awg_cond():
                 tax_percentage=tax,
                 tax_amount=tax_amount,
                 grand_total=grand_total,
-                awg_total=awg_total,  # New: Save AWG total
-                conduit_total=conduit_total,  # New: Save Conduit total
+                awg_total=awg_total,
+                conduit_total=conduit_total,
                 created_at=datetime.utcnow(),
                 project_id=project.id
             )
             db.session.add(cost_estimation)
             db.session.commit()
 
-            # Save AWG entries
+            # Save AWG entries if they exist
             for awg in awg_data:
                 entry = EstimationEntry(
                     type="AWG",
-                    name=awg.get('name'),
-                    cost=awg.get('cost'),
-                    length=awg.get('length'),
-                    subtotal=awg.get('subtotal'),
+                    name=awg.get('name', ''),
+                    cost=awg.get('cost', 0),
+                    length=awg.get('length', 0),
+                    subtotal=awg.get('subtotal', 0),
                     notes_awg=notes_awg,
                     cost_estimation_id=cost_estimation.id,
                     created_at=datetime.utcnow()
                 )
                 db.session.add(entry)
 
-            # Save Conduit entries
+            # Save Conduit entries if they exist
             for conduit in conduit_data:
                 entry = EstimationEntry(
                     type="Conduit",
-                    name=conduit.get('name'),
-                    cost=conduit.get('cost'),
-                    length=conduit.get('length'),
-                    subtotal=conduit.get('subtotal'),
+                    name=conduit.get('name', ''),
+                    cost=conduit.get('cost', 0),
+                    length=conduit.get('length', 0),
+                    subtotal=conduit.get('subtotal', 0),
                     notes_conduit=notes_conduit,
                     cost_estimation_id=cost_estimation.id,
                     created_at=datetime.utcnow()
@@ -151,7 +155,6 @@ def estimate_awg_cond():
 
             # Update project status
             project.status = "wire_conduit_submitted"
-            # Commit all changes to the database
             db.session.commit()
 
             return jsonify({
@@ -161,17 +164,15 @@ def estimate_awg_cond():
             }), 201
 
         except Exception as e:
-            db.session.rollback()  # Rollback in case of error
-            print(f"Error: {str(e)}")  # Log the error
+            db.session.rollback()
+            current_app.logger.error(f"Error submitting AWG/Conduit estimation: {str(e)}")
             return jsonify({'success': False, 'message': f'An error occurred: {str(e)}'}), 500
 
     # Handle GET request
-    # Get the project_id from the query parameters
     project_id = request.args.get('project_id')
     if not project_id:
         return jsonify({'success': False, 'message': 'Project ID is required'}), 400
 
-    # Fetch the project from the database
     project = Project.query.get(project_id)
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
@@ -192,23 +193,27 @@ def estimate_misc_equip():
 
         # Extract fields from the JSON data
         project_id = data.get('project_id')
-        misc_data = data.get('miscData')
-        equipment_data = data.get('equipmentData')
-        tax = data.get('tax')
-        tax_amount = data.get('taxAmount')
-        grand_total = data.get('grandTotal')
-        misc_total = data.get('miscTotal')  # New: Get Miscellaneous total
-        equipment_total = data.get('equipmentTotal')  # New: Get Conduit total
-        notes_misc = data.get('notes_misc')
-        notes_equip = data.get('notes_equip')
+        misc_data = data.get('miscData', [])  # Default to empty list
+        equipment_data = data.get('equipmentData', [])  # Default to empty list
+        tax = data.get('tax', 0)  # Default to 0
+        tax_amount = data.get('taxAmount', 0)  # Default to 0
+        grand_total = data.get('grandTotal', 0)  # Default to 0
+        misc_total = data.get('miscTotal', 0)  # Default to 0
+        equipment_total = data.get('equipmentTotal', 0)  # Default to 0
+        notes_misc = data.get('notes_misc', '')  # Default to empty string
+        notes_equip = data.get('notes_equip', '')  # Default to empty string
 
-        # Validate required fields
-        if not all([project_id, misc_data, equipment_data, tax, tax_amount, grand_total, misc_total, equipment_total]):
-            return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+        # Validate required fields - project_id is the only truly required field
+        if not project_id:
+            return jsonify({'success': False, 'message': 'Project ID is required'}), 400
 
-        # Validate Misc and Equipment data
+        # Validate that at least one section has data
+        if not misc_data and not equipment_data:
+            return jsonify({'success': False, 'message': 'At least one section (Miscellaneous or Equipment) must have data'}), 400
+
+        # Validate data formats
         if not isinstance(misc_data, list) or not isinstance(equipment_data, list):
-            return jsonify({'success': False, 'message': 'Invalid data format for AWG or Conduit'}), 400
+            return jsonify({'success': False, 'message': 'Invalid data format for Miscellaneous or Equipment'}), 400
         
         # Find the project
         project = Project.query.get(project_id)
@@ -229,28 +234,28 @@ def estimate_misc_equip():
             db.session.add(misc_equipment_estimation)
             db.session.commit()
 
-            # Save Miscellaneous entries
+            # Save Miscellaneous entries if they exist
             for misc in misc_data:
                 entry = MiscEquipmentEntry(
                     type="Miscellaneous",
-                    name=misc.get('name'),
-                    cost=misc.get('cost'),
-                    quantity=misc.get('quantity'),
-                    subtotal=misc.get('subtotal'),
+                    name=misc.get('name', ''),
+                    cost=misc.get('cost', 0),
+                    quantity=misc.get('quantity', 0),
+                    subtotal=misc.get('subtotal', 0),
                     notes_misc=notes_misc,
                     misc_equipment_estimation_id=misc_equipment_estimation.id,
                     created_at=datetime.utcnow()
                 )
                 db.session.add(entry)
 
-            # Save Equipment entries
+            # Save Equipment entries if they exist
             for equip in equipment_data:
                 entry = MiscEquipmentEntry(
                     type="Equipment",
-                    name=equip.get('name'),
-                    cost=equip.get('cost'),
-                    quantity=equip.get('quantity'),
-                    subtotal=equip.get('subtotal'),
+                    name=equip.get('name', ''),
+                    cost=equip.get('cost', 0),
+                    quantity=equip.get('quantity', 0),
+                    subtotal=equip.get('subtotal', 0),
                     notes_equip=notes_equip,
                     misc_equipment_estimation_id=misc_equipment_estimation.id,
                     created_at=datetime.utcnow()
@@ -259,7 +264,6 @@ def estimate_misc_equip():
 
             # Update project status
             project.status = "misc_equipment_submitted"
-            # Commit all changes to the database
             db.session.commit()
 
             return jsonify({
@@ -269,17 +273,15 @@ def estimate_misc_equip():
             }), 201
 
         except Exception as e:
-            db.session.rollback()  # Rollback in case of error
-            print(f"Error: {str(e)}")  # Log the error
+            db.session.rollback()
+            current_app.logger.error(f"Error submitting misc/equipment estimation: {str(e)}")
             return jsonify({'success': False, 'message': f'An error occurred: {str(e)}'}), 500
         
     # Handle GET request
-    # Get the project_id from the query parameters
     project_id = request.args.get('project_id')
     if not project_id:
         return jsonify({'success': False, 'message': 'Project ID is required'}), 400
 
-    # Fetch the project from the database
     project = Project.query.get(project_id)
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
