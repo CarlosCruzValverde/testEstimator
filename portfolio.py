@@ -12,6 +12,7 @@ from sqlalchemy.orm import joinedload
 from flask import current_app
 from models import CostEstimation, Project, EstimationEntry, MiscEquipmentEstimation, MiscEquipmentEntry, LaborCostEstimation, LaborCostEntry, ProjectSummary
 from database import db
+from datetime import datetime
 
 
 bp = Blueprint("portfolio", __name__)
@@ -484,7 +485,7 @@ def save_summary():
             'approved_amount',
             # Notes
             'notes'
-        ]
+        ]   
 
         # Update all fields from form data
         for field in fields_to_update:
@@ -557,8 +558,32 @@ def save_summary():
 @bp.route("/portfolio/projects")
 @login_required
 def projects():
-    # Get all projects for the current user
-    projects = Project.query.filter_by(user_id=session["user_id"]).order_by(Project.start_date.desc()).all()
+    # Get current year
+    current_year = datetime.now().year
+    
+    # Get the year filter from request args (default to current year if not provided)
+    year = request.args.get('year', type=int, default=current_year)
+    
+    # Base query for current user's projects
+    query = Project.query.filter_by(user_id=session["user_id"])
+    
+    # Apply year filter (no need to check if year exists since we have a default)
+    query = query.filter(db.extract('year', Project.start_date) == year)
+    
+    # Order and execute query
+    projects = query.order_by(Project.start_date.desc()).all()
+    
+    # Get distinct years for filter dropdown
+    years = db.session.query(
+        db.extract('year', Project.start_date).label('year')
+    ).filter_by(
+        user_id=session["user_id"]
+    ).distinct().order_by(
+        db.desc('year')
+    ).all()
+    
+    # Convert to list of integers
+    year_list = [int(year[0]) for year in years if year[0] is not None]
     
     # Batch load all necessary related data
     project_ids = [p.id for p in projects]
@@ -596,7 +621,10 @@ def projects():
         }
         project_list.append(project_data)
     
-    return render_template("portfolio/listing_projects.html", projects=project_list)
+    return render_template("portfolio/listing_projects.html", 
+                           projects=project_list, years=year_list, 
+                           selected_year=year, current_year=current_year)
+
 
 def get_latest_for_each_project(model, project_ids):
     """Helper function to get most recent record for each project"""
@@ -706,22 +734,24 @@ def update_cost_estimation(project_id):
     try:
         project = Project.query.get_or_404(project_id)
         cost_estimation = project.cost_estimations.first()
-        
+
         if cost_estimation:
             awg_total = 0.0
             conduit_total = 0.0
-            
+        
             # Update entries with normalized values
             for entry in cost_estimation.entries:
                 if entry.type == 'AWG':
                     entry.cost = normalize_float(request.form.get(f'awg_cost_{entry.id}'))
                     entry.length = int(request.form.get(f'awg_length_{entry.id}', 0))
                     entry.subtotal = normalize_float(entry.cost * entry.length)
+                    entry.notes_awg = request.form.get(f'awg_notes_{entry.id}', '')
                     awg_total += entry.subtotal
                 elif entry.type == 'Conduit':
                     entry.cost = normalize_float(request.form.get(f'conduit_cost_{entry.id}'))
                     entry.length = int(request.form.get(f'conduit_length_{entry.id}', 0))
                     entry.subtotal = normalize_float(entry.cost * entry.length)
+                    entry.notes_conduit = request.form.get(f'conduit_notes_{entry.id}', '')
                     conduit_total += entry.subtotal
             
             # Update tax and totals
@@ -738,13 +768,12 @@ def update_cost_estimation(project_id):
             
             db.session.commit()
             flash('Cost estimation updated successfully!', 'success')
-        
         return redirect(url_for('portfolio.project_review', project_id=project_id))
-    
+
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error updating cost estimation: {str(e)}")
-        flash('Error updating cost estimation', 'danger')
+        flash(f'Error updating cost estimation: {str(e)}', 'danger')
         return redirect(url_for('portfolio.project_review', project_id=project_id))
     
 

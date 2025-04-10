@@ -893,6 +893,34 @@ header p {
     padding: 8px 12px;
 }
 
+.year-filter {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 5px;
+}
+
+.year-filter label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.year-filter select {
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+}
+
+.current-year-badge {
+    margin-left: 10px;
+    padding: 3px 8px;
+    background: #e6f7ff;
+    border-radius: 12px;
+    font-size: 0.8em;
+    color: #1890ff;
+    border: 1px solid #91d5ff;
+}
+
 
 /* Animations */
 @keyframes fadeIn {
