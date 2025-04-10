@@ -757,46 +757,61 @@ def update_cost_estimation(project_id):
         project = Project.query.get_or_404(project_id)
         cost_estimation = project.cost_estimations.first()
 
-        if cost_estimation:
-            awg_total = 0.0
-            conduit_total = 0.0
+        if not cost_estimation:
+            flash('No cost estimation found for this project', 'danger')
+            return redirect(url_for('portfolio.project_review', project_id=project_id))
+
+        # Debug: Print form data
+        current_app.logger.debug(f"Form data received: {request.form}")
+
+        awg_total = 0.0
+        conduit_total = 0.0
         
-            # Update entries with normalized values
-            for entry in cost_estimation.entries:
-                if entry.type == 'AWG':
-                    entry.cost = normalize_float(request.form.get(f'awg_cost_{entry.id}'))
-                    entry.length = int(request.form.get(f'awg_length_{entry.id}', 0))
-                    entry.subtotal = normalize_float(entry.cost * entry.length)
-                    entry.notes_awg = request.form.get(f'awg_notes_{entry.id}', '')
-                    awg_total += entry.subtotal
-                elif entry.type == 'Conduit':
-                    entry.cost = normalize_float(request.form.get(f'conduit_cost_{entry.id}'))
-                    entry.length = int(request.form.get(f'conduit_length_{entry.id}', 0))
-                    entry.subtotal = normalize_float(entry.cost * entry.length)
-                    entry.notes_conduit = request.form.get(f'conduit_notes_{entry.id}', '')
-                    conduit_total += entry.subtotal
+        # Update entries with normalized values
+        for entry in cost_estimation.entries:
+            if entry.type == 'AWG':
+                cost = normalize_float(request.form.get(f'awg_cost_{entry.id}'))
+                length =  normalize_float(request.form.get(f'awg_length_{entry.id}'))
+                entry.cost = cost
+                entry.length = length
+                entry.subtotal = normalize_float(entry.cost * entry.length)
+                entry.notes_awg = request.form.get(f'awg_notes_{entry.id}', '')
+                awg_total += entry.subtotal
+                current_app.logger.debug(f"Updated AWG entry {entry.id}: cost={cost}, length={length}")
+
+            elif entry.type == 'Conduit':
+                cost = normalize_float(request.form.get(f'conduit_cost_{entry.id}'))
+                length =  normalize_float(request.form.get(f'conduit_length_{entry.id}'))
+                entry.cost = cost
+                entry.length = length
+                entry.subtotal = normalize_float(cost * length)
+                entry.notes_conduit = request.form.get(f'conduit_notes_{entry.id}', '')
+                conduit_total += entry.subtotal
+                current_app.logger.debug(f"Updated Conduit entry {entry.id}: cost={cost}, length={length}")
             
-            # Update tax and totals
-            tax_percentage = normalize_float(request.form.get('tax_percentage'))
-            subtotal = normalize_float(awg_total + conduit_total)
-            tax_amount = normalize_float(subtotal * (tax_percentage / 100))
-            grand_total = normalize_float(subtotal + tax_amount)
+        # Update tax and totals
+        tax_percentage = normalize_float(request.form.get('tax_percentage'))
+        subtotal = normalize_float(awg_total + conduit_total)
+        tax_amount = normalize_float(subtotal * (tax_percentage / 100))
+        grand_total = normalize_float(subtotal + tax_amount)
+        
+        cost_estimation.tax_percentage = tax_percentage
+        cost_estimation.awg_total = awg_total
+        cost_estimation.conduit_total = conduit_total
+        cost_estimation.tax_amount = tax_amount
+        cost_estimation.grand_total = grand_total
+
+        current_app.logger.debug(f"New totals - AWG: {awg_total}, Conduit: {conduit_total}, Tax: {tax_amount}, Grand: {grand_total}")
             
-            cost_estimation.tax_percentage = tax_percentage
-            cost_estimation.awg_total = awg_total
-            cost_estimation.conduit_total = conduit_total
-            cost_estimation.tax_amount = tax_amount
-            cost_estimation.grand_total = grand_total
-            
-            db.session.commit()
-            flash('Cost estimation updated successfully!', 'success')
-        return redirect(url_for('portfolio.project_review', project_id=project_id))
+        db.session.commit()
+        flash('Cost estimation updated successfully!', 'success')
+        return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='cost-estimation'))
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"Error updating cost estimation: {str(e)}")
+        current_app.logger.error(f"Error updating cost estimation: {str(e)}", exc_info=True)
         flash(f'Error updating cost estimation: {str(e)}', 'danger')
-        return redirect(url_for('portfolio.project_review', project_id=project_id))
+        return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='cost-estimation'))
     
 
 @bp.route("/update_misc_equipment/<int:project_id>", methods=["POST"])
@@ -812,45 +827,53 @@ def update_misc_equipment(project_id):
         project = Project.query.get_or_404(project_id)
         misc_equip = project.misc_equipment_estimations.first()
         
-        if misc_equip:
-            misc_total = 0.0
-            equipment_total = 0.0
-            
-            # Update Miscellaneous entries
-            for entry in misc_equip.entries:
-                if entry.type == 'Miscellaneous':
-                    entry.cost = normalize_float(request.form.get(f'misc_cost_{entry.id}'))
-                    entry.quantity = int(request.form.get(f'misc_quantity_{entry.id}', 0))
-                    entry.subtotal = normalize_float(entry.cost * entry.quantity)
-                    misc_total += entry.subtotal
-                elif entry.type == 'Equipment':
-                    entry.cost = normalize_float(request.form.get(f'equipment_cost_{entry.id}'))
-                    entry.quantity = int(request.form.get(f'equipment_quantity_{entry.id}', 0))
-                    entry.subtotal = normalize_float(entry.cost * entry.quantity)
-                    equipment_total += entry.subtotal
-            
-            # Update tax and totals
-            tax_percentage = normalize_float(request.form.get('tax_percentage'))
-            subtotal = normalize_float(misc_total + equipment_total)
-            tax_amount = normalize_float(subtotal * (tax_percentage / 100))
-            grand_total = normalize_float(subtotal + tax_amount)
-            
-            misc_equip.misc_total = misc_total
-            misc_equip.equipment_total = equipment_total
-            misc_equip.tax_percentage = tax_percentage
-            misc_equip.tax_amount = tax_amount
-            misc_equip.grand_total = grand_total
-            
-            db.session.commit()
-            flash('Miscellaneous & Equipment updated successfully!', 'success')
+        if not misc_equip:
+            flash('No miscellaneous/equipment estimation found for this project', 'danger')
+            return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='misc-equipment'))
         
-        return redirect(url_for('portfolio.project_review', project_id=project_id))
+        misc_total = 0.0
+        equipment_total = 0.0
+        
+        # Update entries with normalized values
+        for entry in misc_equip.entries:
+            if entry.type == 'Miscellaneous':
+                cost = normalize_float(request.form.get(f'misc_cost_{entry.id}'))
+                quantity = normalize_float(request.form.get(f'misc_quantity_{entry.id}'))
+                entry.cost = cost
+                entry.quantity = quantity
+                entry.subtotal = normalize_float(cost * quantity)
+                entry.notes_misc = request.form.get(f'misc_notes_{entry.id}', '')
+                misc_total += entry.subtotal
+            elif entry.type == 'Equipment':
+                cost = normalize_float(request.form.get(f'equipment_cost_{entry.id}'))
+                quantity = normalize_float(request.form.get(f'equipment_quantity_{entry.id}')) 
+                entry.cost = cost
+                entry.quantity = quantity
+                entry.subtotal = normalize_float(cost * quantity)
+                entry.notes_equip = request.form.get(f'equipment_notes_{entry.id}', '')
+                equipment_total += entry.subtotal
+        
+        # Update tax and totals
+        tax_percentage = normalize_float(request.form.get('tax_percentage'))
+        subtotal = normalize_float(misc_total + equipment_total)
+        tax_amount = normalize_float(subtotal * (tax_percentage / 100))
+        grand_total = normalize_float(subtotal + tax_amount)
+        
+        misc_equip.misc_total = misc_total
+        misc_equip.equipment_total = equipment_total
+        misc_equip.tax_percentage = tax_percentage
+        misc_equip.tax_amount = tax_amount
+        misc_equip.grand_total = grand_total
+        
+        db.session.commit()
+        flash('Miscellaneous & Equipment updated successfully!', 'success')
+        return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='misc-equipment'))
     
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"Error updating misc/equipment: {str(e)}")
-        flash('Error updating miscellaneous & equipment', 'danger')
-        return redirect(url_for('portfolio.project_review', project_id=project_id))
+        current_app.logger.error(f"Error updating misc/equipment: {str(e)}", exc_info=True)
+        flash(f'Error updating miscellaneous & equipment: {str(e)}', 'danger')
+        return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='misc-equipment'))
     
 
 @bp.route("/update_labor_cost/<int:project_id>", methods=["POST"])

@@ -268,7 +268,7 @@
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="1" name="awg_length_{{ entry.id }}"
+                                            <input type="number" step="0.1" name="awg_length_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.length }}">
                                         </td>
                                         <td class="subtotal">${{ "%.2f"|format(entry.subtotal) }}</td>
@@ -297,7 +297,7 @@
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="1" name="conduit_length_{{ entry.id }}"
+                                            <input type="number" step="0.1" name="conduit_length_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.length }}">
                                         </td>
                                         <td class="subtotal">${{ "%.2f"|format(entry.subtotal) }}</td>
@@ -451,7 +451,7 @@
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="1" name="misc_quantity_{{ entry.id }}"
+                                            <input type="number" step="0.1" name="misc_quantity_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.quantity }}">
                                         </td>
                                         <td class="subtotal">${{ "%.2f"|format(entry.subtotal) }}</td>
@@ -480,7 +480,7 @@
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="1" name="equipment_quantity_{{ entry.id }}"
+                                            <input type="number" step="0.1" name="equipment_quantity_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.quantity }}">
                                         </td>
                                         <td class="subtotal">${{ "%.2f"|format(entry.subtotal) }}</td>
