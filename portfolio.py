@@ -573,15 +573,18 @@ def projects():
 
     # Apply approval status filter if specified
     if approval_status:
-        # Join with ProjectSummary to filter by approval status
-        query = query.join(ProjectSummary)
-        
         if approval_status == 'approved':
-            query = query.filter(ProjectSummary.approved == True)
+            query = query.join(ProjectSummary).filter(ProjectSummary.approved == True)
         elif approval_status == 'not_approved':
-            query = query.filter(ProjectSummary.approved == False)
+            query = query.join(ProjectSummary).filter(ProjectSummary.approved == False)
         elif approval_status == 'pending':
-            query = query.filter(ProjectSummary.approved.is_(None))
+            # Use outerjoin to include projects without summaries
+            query = query.outerjoin(ProjectSummary).filter(
+                db.or_(
+                    ProjectSummary.approved.is_(None),
+                    ProjectSummary.id.is_(None)  # Projects with no summary at all
+                )
+            )
     
     # Order and execute query
     projects = query.order_by(Project.start_date.desc()).all()
@@ -629,6 +632,7 @@ def projects():
             'chargers_count': labor_map.get(project.id, {}).chargers_count if labor_map.get(project.id)
              else None,
             'approved': project_summary.approved if project_summary else None,
+            'project_summary_exists': project_summary is not None,
             'approved_amount': project_summary.approved_amount if project_summary else None,
             'total_submitted': project_summary.total_submitted if project_summary else None
         }

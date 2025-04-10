@@ -87,7 +87,11 @@
                             </td>
                             <td>
                                 {% if project.approved is none %}
+                                {% if project_summary_exists %} {# Add this to your project data #}
                                 <span class="text-warning">Pending</span>
+                                {% else %}
+                                <span class="text-warning">Pending</span>
+                                {% endif %}
                                 {% elif project.approved %}
                                 <span class="text-success">Approved</span>
                                 {% else %}
