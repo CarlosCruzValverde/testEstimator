@@ -434,7 +434,7 @@ def save_summary():
         numeric_fields = [
             'awg_subtotal', 'conduit_subtotal', 'misc_subtotal', 'equipment_subtotal',
             'labor_subtotal', 'low_voltage_subtotal', 'permits_subtotal',
-            'tax_subtotal', 'overhead_subtotal', 'grand_subtotal', 'grand_total', 'total_submitted', 'approved_amount'
+            'tax_subtotal', 'overhead_subtotal', 'grand_subtotal', 'grand_total', 'price_per_charger', 'total_submitted', 'approved_amount'
         ]
 
         if not all(isinstance(data.get(field), (float, int)) for field in numeric_fields if field in data):
@@ -1067,45 +1067,81 @@ def _refresh_summary_base_costs(project, summary):
         summary.labor_base_cost = labor_cost.labor_total or 0
         summary.low_voltage_base_cost = labor_cost.low_voltage_total or 0
         summary.chargers_count = labor_cost.chargers_count or 0
-        summary.price_per_charger = labor_cost.charger_price or 0
-
+        
 def _recalculate_summary_totals(summary):
-    """Recalculate all derived values in the summary"""
-    # Calculate category subtotals and profits
-    summary.awg_subtotal = round(summary.awg_base_cost * summary.awg_markup, 2)
-    summary.awg_profit = round(summary.awg_subtotal - summary.awg_base_cost, 2)
+    """Recalculate all derived values in the summary with float normalization"""
+    def normalize_float(value, default=0.0):
+        try:
+            return round(float(value), 2)
+        except (ValueError, TypeError):
+            return default
+
+    # Calculate category subtotals and profits with normalization
+    summary.awg_subtotal = normalize_float(summary.awg_base_cost * summary.awg_markup)
+    summary.awg_profit = normalize_float(summary.awg_subtotal - summary.awg_base_cost)
     
-    summary.conduit_subtotal = round(summary.conduit_base_cost * summary.conduit_markup, 2)
-    summary.conduit_profit = round(summary.conduit_subtotal - summary.conduit_base_cost, 2)
+    summary.conduit_subtotal = normalize_float(summary.conduit_base_cost * summary.conduit_markup)
+    summary.conduit_profit = normalize_float(summary.conduit_subtotal - summary.conduit_base_cost)
     
-    summary.misc_subtotal = round(summary.misc_base_cost * summary.misc_markup, 2)
-    summary.misc_profit = round(summary.misc_subtotal - summary.misc_base_cost, 2)
+    summary.misc_subtotal = normalize_float(summary.misc_base_cost * summary.misc_markup)
+    summary.misc_profit = normalize_float(summary.misc_subtotal - summary.misc_base_cost)
     
-    summary.equipment_subtotal = round(summary.equipment_base_cost * summary.equipment_markup, 2)
-    summary.equipment_profit = round(summary.equipment_subtotal - summary.equipment_base_cost, 2)
+    summary.equipment_subtotal = normalize_float(summary.equipment_base_cost * summary.equipment_markup)
+    summary.equipment_profit = normalize_float(summary.equipment_subtotal - summary.equipment_base_cost)
     
-    summary.labor_subtotal = round(summary.labor_base_cost * summary.labor_markup, 2)
-    summary.labor_profit = round(summary.labor_subtotal - summary.labor_base_cost, 2)
+    summary.labor_subtotal = normalize_float(summary.labor_base_cost * summary.labor_markup)
+    summary.labor_profit = normalize_float(summary.labor_subtotal - summary.labor_base_cost)
     
-    summary.low_voltage_subtotal = round(summary.low_voltage_base_cost * summary.low_voltage_markup, 2)
-    summary.low_voltage_profit = round(summary.low_voltage_subtotal - summary.low_voltage_base_cost, 2)
+    summary.low_voltage_subtotal = normalize_float(summary.low_voltage_base_cost * summary.low_voltage_markup)
+    summary.low_voltage_profit = normalize_float(summary.low_voltage_subtotal - summary.low_voltage_base_cost)
     
-    summary.permits_subtotal = round(summary.permits_base_cost * summary.permits_markup, 2)
-    summary.permits_profit = round(summary.permits_subtotal - summary.permits_base_cost, 2)
+    summary.permits_subtotal = normalize_float(summary.permits_base_cost * summary.permits_markup)
+    summary.permits_profit = normalize_float(summary.permits_subtotal - summary.permits_base_cost)
     
-    # Calculate totals
-    taxable_profit = (summary.awg_profit + summary.conduit_profit + summary.misc_profit + 
-                     summary.equipment_profit + summary.labor_profit + summary.low_voltage_profit + 
-                     summary.permits_profit)
+    # Calculate totals with normalization
+    taxable_profit = normalize_float(
+        summary.awg_profit + 
+        summary.conduit_profit + 
+        summary.misc_profit + 
+        summary.equipment_profit + 
+        summary.labor_profit + 
+        summary.low_voltage_profit + 
+        summary.permits_profit
+    )
     
     summary.tax_base_cost = taxable_profit
-    summary.tax_subtotal = round(taxable_profit * (summary.tax_percentage / 100), 2)
+    summary.tax_subtotal = normalize_float(taxable_profit * (summary.tax_percentage / 100))
     
-    grand_subtotal = (summary.awg_subtotal + summary.conduit_subtotal + summary.misc_subtotal + 
-                     summary.equipment_subtotal + summary.labor_subtotal + summary.low_voltage_subtotal + 
-                     summary.permits_subtotal)
+    grand_subtotal = normalize_float(
+        summary.awg_subtotal + 
+        summary.conduit_subtotal + 
+        summary.misc_subtotal + 
+        summary.equipment_subtotal + 
+        summary.labor_subtotal + 
+        summary.low_voltage_subtotal + 
+        summary.permits_subtotal
+    )
     
     summary.grand_subtotal = grand_subtotal
     summary.overhead_base_cost = grand_subtotal
-    summary.overhead_subtotal = round(grand_subtotal * (summary.overhead_percentage / 100), 2)
-    summary.grand_total = round(grand_subtotal + summary.tax_subtotal + summary.overhead_subtotal, 2)
+    summary.overhead_subtotal = normalize_float(grand_subtotal * (summary.overhead_percentage / 100))
+    summary.grand_total = normalize_float(grand_subtotal + summary.tax_subtotal + summary.overhead_subtotal)
+    
+    # Calculate price_per_charger with normalization
+    if hasattr(summary, 'chargers_count') and summary.chargers_count > 0:
+        # Calculate total without low voltage (matches frontend)
+        total_without_low_voltage = normalize_float(
+            summary.awg_subtotal +
+            summary.conduit_subtotal +
+            summary.misc_subtotal +
+            summary.equipment_subtotal +
+            summary.labor_subtotal +
+            summary.permits_subtotal +
+            summary.tax_subtotal +
+            summary.overhead_subtotal
+        )
+        summary.price_per_charger = normalize_float(
+            total_without_low_voltage / summary.chargers_count
+        )
+    else:
+        summary.price_per_charger = 0.0

@@ -84,7 +84,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 1300px;
+    max-width: 1200px;
     animation: fadeIn 0.5s ease-in-out;
 }
 
@@ -788,7 +788,7 @@ header p {
 /* Highlight active edit section */
 
 .card {
-    flex: 1 0 100%;
+    flex: 1 0 60%;
     /* Adjust the flex properties to your needs */
 }
 

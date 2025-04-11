@@ -771,12 +771,12 @@
                             <span>{{ summary.grand_subtotal | currency }}</span>
                         </div>
                         <div class="breakdown-row">
-                            <span class="breakdown-label">Income Tax ({{ "%.2f"|format(summary.tax_percentage)
+                            <span class="breakdown-label">Income Tax ({{ "%.1f"|format(summary.tax_percentage)
                                 }}%):</span>
                             <span>{{ summary.tax_subtotal | currency }}</span>
                         </div>
                         <div class="breakdown-row">
-                            <span class="breakdown-label">Overhead Margin ({{ "%.2f"|format(summary.overhead_percentage)
+                            <span class="breakdown-label">Overhead Margin ({{ "%.1f"|format(summary.overhead_percentage)
                                 }}%):</span>
                             <span>{{ summary.overhead_subtotal | currency }}</span>
                         </div>
@@ -904,8 +904,8 @@
 
                             <!-- Permits & Fees Row -->
                             <div class="highlight">Permits & Fees</div>
-                            <div><input type="number" step="0.1" min="0" name="permits_base_cost"
-                                    value="{{ summary.permits_base_cost }}" class="form-control form-control-sm"></div>
+                            <div id="permits-base-cost" class="base-cost">${{ "%.2f"|format(summary.permits_base_cost)
+                                }}</div>
                             <div><input type="number" step="0.01" min="1.0" name="permits_markup"
                                     value="{{ summary.permits_markup }}" class="form-control form-control-sm"></div>
                             <div class="sub">$<span id="permits-subtotal">{{ "%.2f"|format(summary.permits_subtotal)
@@ -923,11 +923,9 @@
                         <div class="summary-grid">
                             <!-- Income Tax Row -->
                             <div class="highlight">Income Tax</div>
-                            <div class="base-cost2">$<span id="tax-base-cost">{{ "%.2f"|format(summary.tax_base_cost)
-                                    }}</span></div>
+                            <div></div>
                             <div><input type="number" step="1" min="0" name="tax_percentage"
-                                    value="{{ summary.tax_percentage }}"
-                                    class="form-control form-control-sm"><span>%</span></div>
+                                    value="{{ summary.tax_percentage }}" class="percentage-input"><span>%</span></div>
                             <div></div>
                             <div></div>
 
@@ -955,7 +953,7 @@
                         </div>
                         <div class="breakdown-row">
                             <span class="breakdown-label">Income Tax (<span id="tax-percentage-display">{{
-                                    summary.tax_percentage }}</span>% of profit):</span>
+                                    summary.tax_percentage }}</span>% of Tot. Profit):</span>
                             <span>$<span id="tax-summary">{{ "%.2f"|format(summary.tax_subtotal)
                                     }}</span></span>
                         </div>
@@ -975,16 +973,21 @@
                     <!-- Charger Information -->
                     <div class="charger-info mb-3">
                         <div class="charger-row mb-2">
-                            <label class="charger-label">Number of Chargers:</label>
-                            <input type="number" name="chargers_count"
-                                value="{{ project.labor_cost_estimations.first().chargers_count if project.labor_cost_estimations.first() else 0 }}"
-                                class="form-control form-control-sm d-inline-block w-auto">
+                            <span class="charger-label">
+                                Number of Chargers:
+                                <strong style="font-size: 1.5em; color: navy;">{{
+                                    project.labor_cost_estimations.first().chargers_count if
+                                    project.labor_cost_estimations.first() else 0 }}</strong>
+                            </span>
                         </div>
                         <div class="charger-row mb-2">
-                            <label class="charger-label">Price Per Charger (Low Voltage Not Included):</label>
-                            <input type="number" step="0.1" min="0" name="price_per_charger"
-                                value="{{ summary.price_per_charger if summary.price_per_charger else 0 }}"
-                                class="form-control form-control-sm d-inline-block w-auto">
+                            <span class="charger-label">
+                                Price Per Charger (Low Voltage Not Included):
+                                <strong style="font-size: 1.5em; color: navy;">
+                                    {{ "%.1f"|format(summary.price_per_charger) if summary.price_per_charger else "0.0"
+                                    }}
+                                </strong>
+                            </span>
                         </div>
                     </div>
 
@@ -1085,14 +1088,10 @@
                     input.addEventListener('input', calculateSummaryTotals);
                 });
 
-                // Tax percentage input (special case - needs to update both tax displays and grand total)
-                summarySection.querySelector('input[name="tax_percentage"]').addEventListener('input', function () {
-                    calculateSummaryIncomeTax();
-                    calculateSummaryGrandTotals(); // Since tax affects grand total
+                // Percentage inputs
+                summarySection.querySelectorAll('input[name="tax_percentage"], input[name="overhead_percentage"]').forEach(input => {
+                    input.addEventListener('input', calculateSummaryTotals);
                 });
-
-                // Percentage inputs (overhead)
-                summarySection.querySelector('input[name="overhead_percentage"]').addEventListener('input', calculateSummaryTotals);
 
                 // Initial calculation
                 calculateSummaryTotals();
