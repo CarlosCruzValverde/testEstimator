@@ -11,14 +11,18 @@
                 </div>
                 <div class="col-auto">
                     <select name="year" id="year" class="form-select" onchange="this.form.submit()">
+                        <option value="ALL" {% if selected_year=='ALL' %}selected{% endif %}>All Years</option>
                         {% for year in years %}
-                        <option value="{{ year }}" {% if selected_year==year %}selected{% endif %}>{{ year }}</option>
+                        <option value="{{ year }}" {% if selected_year==year|string %}selected{% endif %} {% if
+                            year==current_year %}class="current-year-option" {% endif %}>
+                            {{ year }}{% if year == current_year %}{% endif %}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
-                {% if selected_year == current_year %}
+                {% if selected_year == current_year|string %}
                 <div class="col-auto">
-                    <span class="badge bg-info">Current Year</span>
+                    <span class="badge bg-info current-year-badge">Current Year</span>
                 </div>
                 {% endif %}
             </form>

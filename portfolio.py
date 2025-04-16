@@ -561,15 +561,21 @@ def projects():
     # Get current year
     current_year = datetime.now().year
     
-    # Get the year filter from request args (default to current year if not provided)
-    year = request.args.get('year', type=int, default=current_year)
-    approval_status = request.args.get('approval', type=str)  # 'approved', 'not_approved', 'pending', or None
-    
-    # Base query for current user's projects
+     # Get year filter (defaults to current year, but allows "ALL")
+    year_filter = request.args.get('year', type=str, default=str(current_year))
+    approval_status = request.args.get('approval', type=str)
+
+    # Base query
     query = Project.query.filter_by(user_id=session["user_id"])
     
-    # Apply year filter (no need to check if year exists since we have a default)
-    query = query.filter(db.extract('year', Project.start_date) == year)
+    # Apply year filter ONLY if not "ALL"
+    if year_filter.lower() != 'all':
+        try:
+            year = int(year_filter)  # Ensure it's a valid integer
+            query = query.filter(db.extract('year', Project.start_date) == year)
+        except ValueError:
+            # Fallback to current year if invalid year provided
+            query = query.filter(db.extract('year', Project.start_date) == current_year)
 
     # Apply approval status filter if specified
     if approval_status:
@@ -637,12 +643,20 @@ def projects():
             'total_submitted': project_summary.total_submitted if project_summary else None
         }
         project_list.append(project_data)
+
+
+    # Ensure selected_year is properly set for the template
+    if not request.args.get('year') and year_filter == str(current_year):
+        # No year parameter was provided, so we're using the default (current year)
+        selected_year = str(current_year)
+    else:
+        selected_year = year_filter
     
     return render_template(
         "portfolio/listing_projects.html", 
         projects=project_list,
         years=year_list,
-        selected_year=year,
+        selected_year=year_filter,  # <-- Use year_filter instead
         current_year=current_year,
         selected_approval=approval_status
     )
@@ -687,28 +701,46 @@ def project_review(project_id):
         # Handle Cost Estimation - Filter in Python
         cost_estimation = project.cost_estimations.order_by(CostEstimation.created_at.desc()).first()
         if cost_estimation:
-            data['cost_estimation'] = {
-                'awg': [e for e in cost_estimation.entries if e.type == 'AWG'],
-                'conduit': [e for e in cost_estimation.entries if e.type == 'Conduit'],
-                'main': cost_estimation
+            awg_entries = [e for e in cost_estimation.entries if e.type == 'AWG']
+            conduit_entries = [e for e in cost_estimation.entries if e.type == 'Conduit']
+            
+            # Create the cost_estimation dictionary with notes at the top level
+            cost_estimation_data = {
+                'awg': awg_entries,
+                'conduit': conduit_entries,
+                'main': cost_estimation,
+                'notes_awg': awg_entries[0].notes_awg if awg_entries and awg_entries[0].notes_awg else '',
+                'notes_conduit': conduit_entries[0].notes_conduit if conduit_entries and conduit_entries[0].notes_conduit else ''
             }
+            
+            data['cost_estimation'] = cost_estimation_data
 
         # Handle Misc Equipment - Filter in Python
         misc_equipment = project.misc_equipment_estimations.order_by(MiscEquipmentEstimation.created_at.desc()).first()
         if misc_equipment:
-            data['misc_equipment'] = {
-                'misc': [e for e in misc_equipment.entries if e.type == 'Miscellaneous'],
-                'equipment': [e for e in misc_equipment.entries if e.type == 'Equipment'],
-                'main': misc_equipment
+            misc_entries = [e for e in misc_equipment.entries if e.type == 'Miscellaneous']
+            equip_entries = [e for e in misc_equipment.entries if e.type == 'Equipment']
+            
+            misc_equipment_data = {
+                'misc': misc_entries,
+                'equipment': equip_entries,
+                'main': misc_equipment,
+                'notes_misc': misc_entries[0].notes_misc if misc_entries and misc_entries[0].notes_misc else '',
+                'notes_equip': equip_entries[0].notes_equip if equip_entries and equip_entries[0].notes_equip else ''
             }
 
-        # Handle Labor Cost
+            data['misc_equipment'] = misc_equipment_data
+
+        # Handle Labor Cost (updated section)
         labor_cost = project.labor_cost_estimations.order_by(LaborCostEstimation.created_at.desc()).first()
         if labor_cost:
-            data['labor_cost'] = {
-                'entries': labor_cost.entries,  # Already a list
-                'main': labor_cost
+            labor_cost_data = {
+                'entries': labor_cost.entries,
+                'main': labor_cost,
+                # No need for separate notes here since they're handled per-entry
             }
+            
+            data['labor_cost'] = labor_cost_data
 
         # Handle Summary - ensure we have one
         summary = project.summaries.first()
@@ -778,33 +810,32 @@ def update_cost_estimation(project_id):
             flash('No cost estimation found for this project', 'danger')
             return redirect(url_for('portfolio.project_review', project_id=project_id))
 
-        # Debug: Print form data
-        current_app.logger.debug(f"Form data received: {request.form}")
-
         awg_total = 0.0
         conduit_total = 0.0
+        
+        # Get notes from form
+        notes_awg = request.form.get('notes_awg', '')
+        notes_conduit = request.form.get('notes_conduit', '')
         
         # Update entries with normalized values
         for entry in cost_estimation.entries:
             if entry.type == 'AWG':
                 cost = normalize_float(request.form.get(f'awg_cost_{entry.id}'))
-                length =  normalize_float(request.form.get(f'awg_length_{entry.id}'))
+                length = normalize_float(request.form.get(f'awg_length_{entry.id}'))
                 entry.cost = cost
                 entry.length = length
                 entry.subtotal = normalize_float(entry.cost * entry.length)
-                entry.notes_awg = request.form.get(f'awg_notes_{entry.id}', '')
+                entry.notes_awg = notes_awg  # Set the same notes for all AWG entries
                 awg_total += entry.subtotal
-                current_app.logger.debug(f"Updated AWG entry {entry.id}: cost={cost}, length={length}")
 
             elif entry.type == 'Conduit':
                 cost = normalize_float(request.form.get(f'conduit_cost_{entry.id}'))
-                length =  normalize_float(request.form.get(f'conduit_length_{entry.id}'))
+                length = normalize_float(request.form.get(f'conduit_length_{entry.id}'))
                 entry.cost = cost
                 entry.length = length
                 entry.subtotal = normalize_float(cost * length)
-                entry.notes_conduit = request.form.get(f'conduit_notes_{entry.id}', '')
+                entry.notes_conduit = notes_conduit  # Set the same notes for all Conduit entries
                 conduit_total += entry.subtotal
-                current_app.logger.debug(f"Updated Conduit entry {entry.id}: cost={cost}, length={length}")
             
         # Update tax and totals
         tax_percentage = normalize_float(request.form.get('tax_percentage'))
@@ -817,8 +848,6 @@ def update_cost_estimation(project_id):
         cost_estimation.conduit_total = conduit_total
         cost_estimation.tax_amount = tax_amount
         cost_estimation.grand_total = grand_total
-
-        current_app.logger.debug(f"New totals - AWG: {awg_total}, Conduit: {conduit_total}, Tax: {tax_amount}, Grand: {grand_total}")
 
         # In update_cost_estimation route, just before commit:
         _refresh_summary_base_costs(project, project.summaries.first())  
@@ -852,6 +881,10 @@ def update_misc_equipment(project_id):
         
         misc_total = 0.0
         equipment_total = 0.0
+
+        # Get notes from form
+        notes_misc = request.form.get('notes_misc', '')
+        notes_equip = request.form.get('notes_equip', '')
         
         # Update entries with normalized values
         for entry in misc_equip.entries:
@@ -861,15 +894,16 @@ def update_misc_equipment(project_id):
                 entry.cost = cost
                 entry.quantity = quantity
                 entry.subtotal = normalize_float(cost * quantity)
-                entry.notes_misc = request.form.get(f'misc_notes_{entry.id}', '')
+                entry.notes_misc = notes_misc
                 misc_total += entry.subtotal
+            
             elif entry.type == 'Equipment':
                 cost = normalize_float(request.form.get(f'equipment_cost_{entry.id}'))
                 quantity = normalize_float(request.form.get(f'equipment_quantity_{entry.id}')) 
                 entry.cost = cost
                 entry.quantity = quantity
                 entry.subtotal = normalize_float(cost * quantity)
-                entry.notes_equip = request.form.get(f'equipment_notes_{entry.id}', '')
+                entry.notes_equip = notes_equip
                 equipment_total += entry.subtotal
         
         # Update tax and totals
@@ -914,20 +948,22 @@ def update_labor_cost(project_id):
             return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='labor-cost'))
         
         labor_total = 0.0
+
+        # Get notes from form
+        notes = request.form.get('notes', '')
         
         # Update labor entries with normalized values
         for entry in labor_cost.entries:
             rate = normalize_float(request.form.get(f'rate_{entry.id}'))
             workers = int(request.form.get(f'workers_{entry.id}', 0))
             hours = normalize_float(request.form.get(f'hours_{entry.id}'))
-            days = normalize_float(request.form.get(f'days_{entry.id}'))
-            
+            days = normalize_float(request.form.get(f'days_{entry.id}'))         
             entry.rate = rate
             entry.workers = workers
             entry.hours = hours
             entry.days = days
             entry.subtotal = normalize_float(rate * workers * hours * days)
-            entry.notes = request.form.get(f'notes_{entry.id}', entry.notes or '')
+            entry.notes = notes
             labor_total += entry.subtotal
         
         # Update charger information
@@ -1020,6 +1056,10 @@ def update_summary(project_id):
         summary.low_voltage_markup = validate_positive_float(request.form.get('low_voltage_markup'), "Low voltage markup", min_value=1.0)
         summary.permits_markup = validate_positive_float(request.form.get('permits_markup'), "Permits markup", min_value=1.0)
         
+        # Handle editable permits base cost
+        if 'permits_base_cost' in request.form:
+            summary.permits_base_cost = validate_positive_float(request.form.get('permits_base_cost'), "Permits base cost")
+
         summary.tax_percentage = validate_tax_percentage(request.form.get('tax_percentage'))
         summary.overhead_percentage = validate_positive_float(request.form.get('overhead_percentage'), "Overhead percentage")
 
@@ -1027,10 +1067,9 @@ def update_summary(project_id):
         summary.approved = request.form.get('approved') == 'true'
         summary.total_submitted = validate_positive_float(request.form.get('total_submitted', 0))
         summary.approved_amount = validate_positive_float(request.form.get('approved_amount', 0))
-        summary.price_per_charger = validate_positive_float(request.form.get('price_per_charger', 0))
         summary.notes = request.form.get('notes', '')
 
-        # Recalculate all values
+        # Recalculate all values (including price_per_charger)
         _recalculate_summary_totals(summary)
 
         db.session.commit()
@@ -1127,18 +1166,12 @@ def _recalculate_summary_totals(summary):
     summary.overhead_subtotal = normalize_float(grand_subtotal * (summary.overhead_percentage / 100))
     summary.grand_total = normalize_float(grand_subtotal + summary.tax_subtotal + summary.overhead_subtotal)
     
-    # Calculate price_per_charger with normalization
+    # Calculate price_per_charger (excluding low voltage)
     if hasattr(summary, 'chargers_count') and summary.chargers_count > 0:
-        # Calculate total without low voltage (matches frontend)
+        # Calculate total without low voltage (matches frontend logic)
         total_without_low_voltage = normalize_float(
-            summary.awg_subtotal +
-            summary.conduit_subtotal +
-            summary.misc_subtotal +
-            summary.equipment_subtotal +
-            summary.labor_subtotal +
-            summary.permits_subtotal +
-            summary.tax_subtotal +
-            summary.overhead_subtotal
+            summary.grand_total - 
+            getattr(summary, 'low_voltage_subtotal', 0)
         )
         summary.price_per_charger = normalize_float(
             total_without_low_voltage / summary.chargers_count

@@ -150,6 +150,7 @@ function calculateOverheadMargin() {
     document.getElementById('overhead-summary').textContent = `$${formatCurrency(overheadMargin)}`;
 }
 
+
 function calculateGrandTotals() {
     const categories = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'low-voltage', 'permits', 'tax', 'overhead'];
     const categories1 = ['awg', 'conduit', 'misc', 'equipment', 'labor', 'permits', 'tax', 'overhead'];
@@ -183,7 +184,6 @@ function calculateGrandTotals() {
         const subtotal = parseFloat(document.getElementById(`${category}-subtotal`).textContent.replace(/[^0-9.-]/g, '')) || 0;
         grandTotal1 += subtotal;
     });
-
 
     // Update displays
     document.getElementById('grand-subtotal').textContent = `$${formatCurrency(grandSubtotal)}`;
