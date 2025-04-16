@@ -45,14 +45,14 @@ function calculateLaborTotals() {
     const chargersCount = parseInt(document.getElementById('chargers-count').value) || 0;
     const chargerPrice = parseFloat(document.getElementById('charger-price').value) || 0;
     const lowVoltageTotal = chargersCount * chargerPrice;
-    const hasLowVoltageData = lowVoltageTotal > 0;
+    const hasLowVoltageData = lowVoltageTotal >= 0;
 
     // Update all displays
     updateDisplays(laborTotal, lowVoltageTotal);
 
     // Validate low voltage data
     if (!hasLowVoltageData) {
-        showError('Please fill out low voltage fields.');
+        showError('Low voltage total cannot be negative. Please check your inputs.');
         return null;
     }
 

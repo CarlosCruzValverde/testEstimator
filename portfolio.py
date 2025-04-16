@@ -309,9 +309,13 @@ def estimate_labor_cost():
         low_voltage_total = data.get('lowVoltageTotal')
         grand_total = data.get('grandTotal')
 
-        # Validate required fields
-        if not all([project_id, labor_data, low_voltage_data, labor_total, low_voltage_total, grand_total]):
+        # Validate required fields (but allow low_voltage_total to be 0)
+        if None in [project_id, labor_data, low_voltage_data, labor_total, grand_total] or low_voltage_total is None:
             return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+
+        # Explicitly validate low_voltage_total can be >= 0
+        if low_voltage_total < 0:
+            return jsonify({'success': False, 'message': 'Low voltage total cannot be negative'}), 400
 
         # Validate Labor data
         if not isinstance(labor_data, list):
