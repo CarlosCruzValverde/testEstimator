@@ -1000,13 +1000,15 @@ def update_labor_cost(project_id):
 @bp.route("/update_summary/<int:project_id>", methods=["POST"])
 @login_required
 def update_summary(project_id):
-    def validate_positive_float(value, field_name, max_value=None):
+    def validate_positive_float(value, field_name, max_value=None, min_value=None):
         try:
             num = float(value)
             if num < 0:
                 raise ValueError(f"{field_name} must be positive")
             if max_value is not None and num > max_value:
                 raise ValueError(f"{field_name} must be ≤ {max_value}")
+            if min_value is not None and num < min_value:
+                raise ValueError(f"{field_name} must be ≥ {min_value}")
             return round(num, 2)
         except (ValueError, TypeError):
             raise ValueError(f"Invalid {field_name}: must be a number")
@@ -1062,7 +1064,7 @@ def update_summary(project_id):
         
         # Handle editable permits base cost
         if 'permits_base_cost' in request.form:
-            summary.permits_base_cost = request.form.get('permits_base_cost')
+            summary.permits_base_cost = validate_positive_float(request.form.get('permits_base_cost'), "Permits base cost", min_value=0)
 
         summary.tax_percentage = validate_tax_percentage(request.form.get('tax_percentage'))
         summary.overhead_percentage = validate_positive_float(request.form.get('overhead_percentage'), "Overhead percentage")
