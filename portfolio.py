@@ -1062,7 +1062,7 @@ def update_summary(project_id):
         
         # Handle editable permits base cost
         if 'permits_base_cost' in request.form:
-            summary.permits_base_cost = validate_positive_float(request.form.get('permits_base_cost'), "Permits base cost")
+            summary.permits_base_cost = request.form.get('permits_base_cost')
 
         summary.tax_percentage = validate_tax_percentage(request.form.get('tax_percentage'))
         summary.overhead_percentage = validate_positive_float(request.form.get('overhead_percentage'), "Overhead percentage")
