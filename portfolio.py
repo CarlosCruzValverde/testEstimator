@@ -1071,8 +1071,8 @@ def update_summary(project_id):
 
         # Update approval status
         summary.approved = request.form.get('approved') == 'true'
-        summary.total_submitted = validate_positive_float(request.form.get('total_submitted', 0))
-        summary.approved_amount = validate_positive_float(request.form.get('approved_amount', 0))
+        summary.total_submitted = validate_positive_float(request.form.get('total_submitted', 0), "Total submitted")
+        summary.approved_amount = validate_positive_float(request.form.get('approved_amount', 0), "Approved amount")
         summary.notes = request.form.get('notes', '')
 
         # Recalculate all values (including price_per_charger)
