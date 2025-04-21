@@ -72,19 +72,19 @@ body {
     padding: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
     color: #333;
 }
 
 .container {
-    margin-top: 20px;
+    margin-top: 40px;
     background-color: #ffffff;
-    padding: 2rem;
+    padding: 2.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 1200px;
+    width: 90%;
+    max-width: 1600px;
     animation: fadeIn 0.5s ease-in-out;
 }
 
@@ -1004,5 +1004,46 @@ header p {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Media queries for different resolutions */
+@media screen and (min-width: 1920px) {
+    .container {
+        max-width: 1400px;
+        padding: 3rem;
+    }
+}
+
+@media screen and (min-width: 2560px) {
+    body {
+        margin-top: 80px; /* More space for navigation */
+        font-size: 1.05rem; /* Slightly larger base font */
+    }
+    
+    .container {
+        max-width: 1800px;
+        padding: 3.5rem;
+        margin-top: 60px;
+        border-radius: 16px; /* More pronounced rounded corners */
+    }
+    
+    /* You might want to scale up other elements too */
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+}
+
+/* Maintain mobile responsiveness */
+@media screen and (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 1.5rem;
+        margin-top: 20px;
     }
 }
