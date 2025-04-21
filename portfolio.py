@@ -1185,3 +1185,30 @@ def _recalculate_summary_totals(summary):
         )
     else:
         summary.price_per_charger = 0.0
+
+
+@bp.route("/portfolio/projects/delete/<int:project_id>", methods=["POST"])
+@login_required
+def delete_project(project_id):
+    project = Project.query.filter_by(id=project_id, user_id=session["user_id"]).first()
+    
+    if not project:
+        flash("Project not found or you don't have permission to delete it", "danger")
+        return redirect(url_for('portfolio.projects'))
+    
+    try:
+        # Delete all related records first (due to foreign key constraints)
+        CostEstimation.query.filter_by(project_id=project_id).delete()
+        MiscEquipmentEstimation.query.filter_by(project_id=project_id).delete()
+        LaborCostEstimation.query.filter_by(project_id=project_id).delete()
+        ProjectSummary.query.filter_by(project_id=project_id).delete()
+        
+        # Now delete the project
+        db.session.delete(project)
+        db.session.commit()
+        flash("Project deleted successfully", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting project: {str(e)}", "danger")
+    
+    return redirect(url_for('portfolio.projects'))
