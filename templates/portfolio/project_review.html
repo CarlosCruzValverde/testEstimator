@@ -279,11 +279,11 @@
                                     <tr>
                                         <td>{{ entry.name }}</td>
                                         <td>
-                                            <input type="number" step="0.1" name="awg_cost_{{ entry.id }}"
+                                            <input type="number" step="0.01" name="awg_cost_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="0.1" name="awg_length_{{ entry.id }}"
+                                            <input type="number" step="0.01" name="awg_length_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.length }}">
                                         </td>
                                         <td class="subtotal">${{ "%.2f"|format(entry.subtotal) }}</td>
@@ -310,11 +310,11 @@
                                     <tr>
                                         <td>{{ entry.name }}</td>
                                         <td>
-                                            <input type="number" step="0.1" name="conduit_cost_{{ entry.id }}"
+                                            <input type="number" step="0.01" name="conduit_cost_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="0.1" name="conduit_length_{{ entry.id }}"
+                                            <input type="number" step="0.01" name="conduit_length_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.length }}">
                                         </td>
                                         <td class="subtotal">${{ "%.2f"|format(entry.subtotal) }}</td>
@@ -330,7 +330,7 @@
                         <!-- Tax Percentage Input -->
                         <div class="col-md-4 pe-4"> <!-- Added right padding -->
                             <label class="form-label">Tax Percentage</label>
-                            <input type="number" step="0.1" name="tax_percentage" class="form-control"
+                            <input type="number" step="0.01" name="tax_percentage" class="form-control"
                                 value="{{ cost_estimation.main.tax_percentage }}">
                         </div>
 
@@ -492,11 +492,11 @@
                                     <tr>
                                         <td>{{ entry.name }}</td>
                                         <td>
-                                            <input type="number" step="0.1" name="misc_cost_{{ entry.id }}"
+                                            <input type="number" step="0.01" name="misc_cost_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="0.1" name="misc_quantity_{{ entry.id }}"
+                                            <input type="number" step="0.01" name="misc_quantity_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.quantity }}">
                                         </td>
                                         <td class="subtotal">{{ (entry.subtotal) | currency }}</td>
@@ -523,11 +523,11 @@
                                     <tr>
                                         <td>{{ entry.name }}</td>
                                         <td>
-                                            <input type="number" step="0.1" name="equipment_cost_{{ entry.id }}"
+                                            <input type="number" step="0.01" name="equipment_cost_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.cost }}">
                                         </td>
                                         <td>
-                                            <input type="number" step="0.1" name="equipment_quantity_{{ entry.id }}"
+                                            <input type="number" step="0.01" name="equipment_quantity_{{ entry.id }}"
                                                 class="form-control form-control-sm" value="{{ entry.quantity }}">
                                         </td>
                                         <td class="subtotal">{{ (entry.subtotal) | currency }}</td>
@@ -543,7 +543,7 @@
                         <!-- Tax Percentage Input -->
                         <div class="col-md-4 pe-4"> <!-- Right padding -->
                             <label class="form-label">Tax Percentage</label>
-                            <input type="number" step="0.1" name="tax_percentage" class="form-control"
+                            <input type="number" step="0.01" name="tax_percentage" class="form-control"
                                 value="{{ misc_equipment.main.tax_percentage }}">
                         </div>
 
@@ -679,7 +679,7 @@
                             <tr>
                                 <td>{{ entry.position }}</td>
                                 <td>
-                                    <input type="number" step="0.1" name="rate_{{ entry.id }}"
+                                    <input type="number" step="0.01" name="rate_{{ entry.id }}"
                                         class="form-control form-control-sm" value="{{ entry.rate }}">
                                 </td>
                                 <td>
@@ -995,7 +995,7 @@
                             <!-- Permits & Fees Row -->
                             <div class="highlight">Permits & Fees</div>
                             <div>
-                                <input type="number" step="0.1" min="0.0" name="permits_base_cost"
+                                <input type="number" step="0.01" min="0.0" name="permits_base_cost"
                                     value="{{ summary.permits_base_cost }}" class="form-control form-control-sm"
                                     id="permits-base-cost">
                             </div>
@@ -1114,13 +1114,13 @@
                     <div class="summary-breakdown mb-3">
                         <div class="breakdown-row mb-2">
                             <label class="fw-bold">Total Submitted:</label>
-                            <input type="number" step="0.1" min="0" name="total_submitted"
+                            <input type="number" step="0.01" min="0" name="total_submitted"
                                 value="{{ summary.total_submitted if summary.total_submitted else 0 }}"
                                 class="form-control form-control-sm d-inline-block w-auto">
                         </div>
                         <div class="breakdown-row mb-2">
                             <label class="fw-bold">Approved Amount:</label>
-                            <input type="number" step="0.1" min="0" name="approved_amount"
+                            <input type="number" step="0.01" min="0" name="approved_amount"
                                 value="{{ summary.approved_amount if summary.approved_amount else 0 }}"
                                 class="form-control form-control-sm d-inline-block w-auto">
                         </div>
