@@ -75,6 +75,7 @@
                             <th>Price per-charger</th>
                             <th>Status</th>
                             <th>Actions</th>
+                            <th>Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -154,10 +155,19 @@
                                     </a>
                                 </div>
                             </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-danger delete-project-btn" title="Delete Project"
+                                        data-bs-toggle="modal" data-bs-target="#deleteProjectModal"
+                                        data-project-id="{{ project.id }}" data-project-address="{{ project.address }}">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="10" class="text-center py-4">
+                            <td colspan="11" class="text-center py-4">
                                 <div class="text-muted">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mt-2">No projects found</p>
@@ -174,4 +184,53 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal - Add this right here -->
+<div class="modal fade" id="deleteProjectModal" tabindex="-1" aria-labelledby="deleteProjectModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteProjectModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the project at:</p>
+                <p class="fw-bold" id="projectAddress"></p>
+                <p class="text-danger">This action cannot be undone and will delete all associated data!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteProjectForm" method="POST" action="">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash-fill"></i> Delete Permanently
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteModal = document.getElementById('deleteProjectModal');
+        const deleteForm = document.getElementById('deleteProjectForm');
+        const projectAddressSpan = document.getElementById('projectAddress');
+
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const projectId = button.getAttribute('data-project-id');
+                const projectAddress = button.getAttribute('data-project-address');
+
+                // Update the modal content
+                projectAddressSpan.textContent = projectAddress;
+
+                // Update the form action
+                deleteForm.action = `/portfolio/projects/delete/${projectId}`;
+            });
+        }
+    });
+</script>
 {% endblock %}
