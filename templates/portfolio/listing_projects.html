@@ -72,6 +72,7 @@
                             <th>Chargers</th>
                             <th>Approved</th>
                             <th>Amount</th>
+                            <th>Price per-charger</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -127,6 +128,17 @@
                                 {% endif %}
                             </td>
                             <td>
+                                {% if project.price_per_charger is not none %}
+                                <span style="color: green">
+                                    ${{ "{:,.2f}".format(project.price_per_charger) }}
+                                </span>
+                                {% else %}
+                                <span style="color: red">
+                                    N/A
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
                                 <span class="badge 
                                     {% if project.status == 'completed' %}bg-success
                                     {% elif project.status == 'in_progress' %}bg-primary
@@ -145,7 +157,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="7" class="text-center py-4">
+                            <td colspan="10" class="text-center py-4">
                                 <div class="text-muted">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mt-2">No projects found</p>
