@@ -341,8 +341,8 @@ document.getElementById('add-conduit').addEventListener('click', function () {
                 <input type="number" placeholder="Cost per foot ($)" step="0.01">
             </div>
             <div class="input-with-label">
-                <label for="new-conduit-length">Length (feet)</label>
-                <input type="number" placeholder="Length (feet)">
+                <label for="new-conduit-length">Qty (units)</label>
+                <input type="number" placeholder="qty (units)">
             </div>
         </div>
         <div class="subtotal">Subtotal: $0.00</div>
