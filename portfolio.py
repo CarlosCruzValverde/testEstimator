@@ -24,6 +24,46 @@ def index():
     return render_template("portfolio/index.html")
 
 
+@bp.route('/portfolio/search')
+@login_required
+def search_projects():
+    search_query = request.args.get('q', '').strip()
+    user_id = session['user_id']
+    
+    if not search_query:
+        return jsonify({})
+    
+    # Query only projects belonging to the current user
+    projects = db.session.query(
+        Project.id,
+        Project.address,
+        Project.company,
+        Project.p_type,
+        LaborCostEstimation.chargers_count
+    ).join(
+        LaborCostEstimation,
+        Project.id == LaborCostEstimation.project_id
+    ).filter(
+        Project.address.ilike(f'%{search_query}%'),  # Case-insensitive LIKE
+        Project.user_id == user_id  # This is the crucial security filter
+    ).all()
+    
+    # Convert results to dictionary format
+    results = [
+        {
+            "id": p.id,
+            "address": p.address,
+            "company": p.company,
+            "p_type": p.p_type,
+            "chargers_count": p.chargers_count
+        }
+        for p in projects
+    ]
+    
+    return jsonify(results)
+
+
+
 @bp.route("/portfolio/new_project", methods=["GET", "POST"])
 @login_required
 def new_project():  
