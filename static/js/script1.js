@@ -16,6 +16,7 @@ document.getElementById('newProjectForm').addEventListener('submit', function (e
         p_type: document.getElementById('p_type').value === 'custom' ?
             document.getElementById('customOption').value.trim() : // Custom project type
             document.getElementById('p_type').value, // Predefined project type
+        chargers_count: parseInt(document.getElementById('chargers_count').value) // Number of chargers
     };
 
     // Submit form data to Flask
@@ -44,13 +45,24 @@ function validateFields() {
     const startDate = document.getElementById('start_date').value;
     const pType = document.getElementById('p_type').value;
     const customOption = document.getElementById('customOption').value;
+    const chargersCount = document.getElementById('chargers_count').value;
 
-    if (!address || !startDate) {
+    if (!address || !startDate || !chargersCount) {
         isValid = false;
         Swal.fire({
             icon: 'error',
             title: 'Oops...',
             text: 'Please fill out all required fields.',
+        });
+    }
+
+    // Validate chargers count is a positive number
+    if (chargersCount < 1) {
+        isValid = false;
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Value',
+            text: 'Number of chargers must be at least 1',
         });
     }
 
