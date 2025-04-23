@@ -374,24 +374,36 @@ def estimate_labor_cost():
         project = Project.query.get(project_id)
         if not project:
             return jsonify({'success': False, 'message': 'Project not found'}), 404
+        
+        # Get the existing labor estimation or create a new one
+        labor_cost_estimation = LaborCostEstimation.query.filter_by(project_id=project_id).first()
+        
+        try:
+            if labor_cost_estimation:
+                # Update existing labor estimation
+                labor_cost_estimation.labor_total = labor_total
+                labor_cost_estimation.low_voltage_total = low_voltage_total
+                labor_cost_estimation.grand_total = grand_total
+                labor_cost_estimation.charger_price = low_voltage_data.get('chargerPrice')
+                labor_cost_estimation.updated_at = datetime.utcnow()
+            else:
+                # Create new labor estimation (shouldn't happen in normal flow)
+                labor_cost_estimation = LaborCostEstimation(
+                    labor_total=labor_total,
+                    low_voltage_total=low_voltage_total,
+                    grand_total=grand_total,
+                    chargers_count=low_voltage_data.get('chargersCount'),
+                    charger_price=low_voltage_data.get('chargerPrice'),
+                    created_at=datetime.utcnow(),
+                    project_id=project.id
+                )
+                db.session.add(labor_cost_estimation)
+                
+            # Clear existing labor entries
+            LaborCostEntry.query.filter_by(labor_cost_estimation_id=labor_cost_estimation.id).delete()
 
-        try:    
-            # Create a new LaborCostEstimation record
-            labor_cost_estimation = LaborCostEstimation(
-                labor_total=labor_total,
-                low_voltage_total=low_voltage_total,
-                grand_total=grand_total,
-                chargers_count=low_voltage_data.get('chargersCount'),
-                charger_price=low_voltage_data.get('chargerPrice'),
-                created_at=datetime.utcnow(),
-                project_id=project.id
-            )
-            db.session.add(labor_cost_estimation)
-            db.session.commit()
-
-            # Save Labor entries
+            # Save new Labor entries
             for labor in labor_data:
-                # Only save entries that have data
                 if any([labor.get('rate'), labor.get('workers'), labor.get('hours'), labor.get('days')]):
                     entry = LaborCostEntry(
                         position=labor.get('position'),
@@ -407,7 +419,6 @@ def estimate_labor_cost():
 
             # Update project status
             project.status = "labor_cost_submitted"
-            # Commit all changes to the database
             db.session.commit()
 
             return jsonify({
@@ -438,8 +449,12 @@ def estimate_labor_cost():
             'success': False, 
             'message': f'Project must be in misc_equipment_submitted status. Current status: {project.status}'
         }), 400
+    
+    # Get the chargers_count from the associated LaborCostEstimation
+    labor_estimation = LaborCostEstimation.query.filter_by(project_id=project_id).first()
+    chargers_count = labor_estimation.chargers_count if labor_estimation else 0
 
-    return render_template("portfolio/estimate_labor_cost.html", project_id=project_id)
+    return render_template("portfolio/estimate_labor_cost.html", project_id=project_id, chargers_count=chargers_count)
 
 
 @bp.route("/portfolio/get_estimation_data")
