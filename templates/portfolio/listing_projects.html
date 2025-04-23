@@ -153,6 +153,12 @@
                                         class="btn btn-outline-primary" title="View Details">
                                         <i class="bi bi-eye-fill"></i>
                                     </a>
+                                    {% if project.status != 'completed' %}
+                                    <a href="{{ url_for('portfolio.resume_project', project_id=project.id) }}"
+                                        class="btn btn-outline-success" title="Resume Project">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </td>
                             <td>
