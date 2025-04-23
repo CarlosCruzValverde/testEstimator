@@ -91,7 +91,7 @@ body {
 /* Flash message styling */
 header {
     position: fixed;
-    top: 60px; /* Height of your navbar */
+    top: 80px; /* Height of your navbar */
     left: 0;
     right: 0;
     z-index: 999; /* Just below navbar's z-index */
