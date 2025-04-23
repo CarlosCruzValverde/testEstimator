@@ -105,6 +105,15 @@ def new_project():
         db.session.add(new_project)
         db.session.commit()
 
+        # Create initial LaborCostEstimation with chargers_count
+        labor_estimation = LaborCostEstimation(
+            chargers_count=data['chargers_count'],
+            project_id=new_project.id,
+            created_at=datetime.utcnow()
+        )
+        db.session.add(labor_estimation)
+        db.session.commit()
+
         # Return the project ID to the frontend
         return jsonify({"project_id": new_project.id, "status": new_project.status}), 201
     
