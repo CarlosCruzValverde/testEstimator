@@ -730,6 +730,30 @@ def get_latest_for_each_project(model, project_ids):
     ).all()
 
 
+@bp.route("/portfolio/resume_project/<int:project_id>")
+@login_required
+def resume_project(project_id):
+    # Verify project exists and belongs to user
+    project = Project.query.filter_by(id=project_id, user_id=session["user_id"]).first()
+    if not project:
+        abort(404)
+    
+    # Determine where to redirect based on status
+    if project.status == "started":
+        return redirect(url_for('portfolio.estimate_awg_cond', project_id=project_id))
+    elif project.status == "wire_conduit_submitted":
+        return redirect(url_for('portfolio.estimate_misc_equip', project_id=project_id))
+    elif project.status == "misc_equipment_submitted":
+        return redirect(url_for('portfolio.estimate_labor_cost', project_id=project_id))
+    elif project.status == "labor_cost_submitted":
+        return redirect(url_for('portfolio.save_summary', project_id=project_id))
+    elif project.status == "completed":
+        return redirect(url_for('portfolio.save_summary', project_id=project_id))
+    else:
+        # Unknown status - handle appropriately
+        return redirect(url_for('portfolio.projects'))
+        
+
 @bp.route("/project_review/<int:project_id>")
 @login_required
 def project_review(project_id):
