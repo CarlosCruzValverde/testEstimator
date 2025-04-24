@@ -146,27 +146,27 @@ function calculateTotals() {
     });
 
     // Display Miscellaneous and Equipment totals
-    document.getElementById('misc-subtotal').textContent = `Total Miscellaneous Cost: $${miscTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
-    document.getElementById('equipment-subtotal').textContent = `Total Main Equipment Cost: $${equipmentTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+    document.getElementById('misc-total').textContent = `Total Miscellaneous Cost: $${miscTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+    document.getElementById('equipment-total').textContent = `Total Main Equipment Cost: $${equipmentTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
 
     // Calculate TAX and Grand Total
     const tax = parseFloat(document.getElementById('tax').value) || 0;
-    const taxAmountMisc = miscTotal * (tax / 100);
+    const taxAmount = (miscTotal + equipmentTotal) * (tax / 100);
+    const grandTotal = miscTotal + equipmentTotal + taxAmount;
+
+    const taxAmountMisc = (miscTotal) * (tax / 100);
     const grandTotalMisc = miscTotal + taxAmountMisc;
 
-    const taxAmountEquipment = equipmentTotal * (tax / 100);
+    const taxAmountEquipment = (equipmentTotal) * (tax / 100);
     const grandTotalEquipment = equipmentTotal + taxAmountEquipment;
-
-    const taxAmountTotal = taxAmountMisc + taxAmountEquipment;
-    const grandTotal = grandTotalMisc + grandTotalEquipment;
 
     // Display TAX and Grand Total
     document.getElementById('tax-amountMisc').textContent = `$${taxAmountMisc.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
-    document.getElementById('misc-total').textContent = `$${grandTotalMisc.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+    document.getElementById('misc-grandtotal').textContent = `$${grandTotalMisc.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
 
     document.getElementById('tax-amountEquipment').textContent = `$${taxAmountEquipment.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
-    document.getElementById('equipment-total').textContent = `$${grandTotalEquipment.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
-
+    document.getElementById('equipment-grandtotal').textContent = `$${grandTotalEquipment.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+    
     // Collect other fields
     const notes_misc = document.getElementById('notes_misc').value;
     const notes_equip = document.getElementById('notes_equip').value;
@@ -181,11 +181,7 @@ function calculateTotals() {
         miscData: miscData,
         equipmentData: equipmentData,
         tax: tax,
-        taxAmountMisc: taxAmountMisc,
-        grandTotalMisc: grandTotalMisc,
-        taxAmountEquipment: taxAmountEquipment,
-        grandTotalEquipment: grandTotalEquipment,
-        taxAmountTotal: taxAmountTotal,
+        taxAmount: taxAmount,
         grandTotal: grandTotal,
         miscTotal: miscTotal,
         equipmentTotal: equipmentTotal,
