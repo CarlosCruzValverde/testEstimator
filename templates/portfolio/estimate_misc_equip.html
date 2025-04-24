@@ -301,11 +301,25 @@
         <div class="tax-grand-total">
             <div class="input-group">
                 <label for="tax">TAX (%)</label>
-                <input type="number" id="tax" placeholder="Enter TAX percentage" value="9.5" step="0.1" required>
+                <input type="number" id="tax" placeholder="Enter TAX percentage" value="9.5" step="0.01" required>
             </div>
-            <div class="result">
-                <h2>TAX Amount: <span id="tax-amount">$0.00</span></h2>
-                <h2>Grand Total (including TAX): <span id="grand-total">$0.00</span></h2>
+        </div>
+        <div class="columns">
+            <!-- Column 1: Miscelaneous -->
+            <div class="column">
+                <div class="result">
+                    <h2>TAX Amount: <span id="tax-amountMisc">$0.00</span></h2>
+                    <h2>Grand Total <span style="font-weight: bold;">AWG</span> (incl. TAX): <span
+                            id="misc-grandtotal">$0.00</span></h2>
+                </div>
+            </div>
+            <!-- Column 2: Equipment -->
+            <div class="column">
+                <div class="result">
+                    <h2>TAX Amount: <span id="tax-amountEquipment">$0.00</span></h2>
+                    <h2>Grand Total <span style="font-weight: bold;">Conduit</span> (incl. TAX): <span
+                            id="equipment-grandtotal">$0.00</span></h2>
+                </div>
             </div>
         </div>
 
