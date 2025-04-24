@@ -207,17 +207,27 @@ function calculateTotals() {
     });
 
     // Display AWG and Conduit totals
-    document.getElementById('awg-total').textContent = `Total AWG Cost: $${awgTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
-    document.getElementById('conduit-total').textContent = `Total Conduit Cost: $${conduitTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+    document.getElementById('awg-subtotal').textContent = `Total AWG Cost: $${awgTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+    document.getElementById('conduit-subtotal').textContent = `Total Conduit Cost: $${conduitTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
 
-    // Calculate TAX and Grand Total
+    // Calculate TAX and Grand Total for AWG
     const tax = parseFloat(document.getElementById('tax').value) || 0;
-    const taxAmount = (awgTotal + conduitTotal) * (tax / 100);
-    const grandTotal = awgTotal + conduitTotal + taxAmount;
+    const taxAmountAWG = awgTotal * (tax / 100);
+    const grandTotalAWG = awgTotal + taxAmountAWG;
+
+    // Calculate TAX and Grand Total for Conduit
+    const taxAmountConduit = conduitTotal * (tax / 100);
+    const grandTotalConduit = conduitTotal + taxAmountConduit;
+
+    const taxAmountTotal = taxAmountAWG + taxAmountConduit;
+    const grandTotal = grandTotalAWG + grandTotalConduit;
 
     // Display TAX and Grand Total
-    document.getElementById('tax-amount').textContent = `$${taxAmount.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
-    document.getElementById('grand-total').textContent = `$${grandTotal.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+    document.getElementById('tax-amountAWG').textContent = `$${taxAmountAWG.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+    document.getElementById('awg-total').textContent = `$${grandTotalAWG.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+
+    document.getElementById('tax-amountConduit').textContent = `$${taxAmountConduit.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
+    document.getElementById('conduit-total').textContent = `$${grandTotalConduit.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 })}`;
 
     // Collect other fields
     const notes_awg = document.getElementById('notes_awg').value;
@@ -233,7 +243,11 @@ function calculateTotals() {
         awgData: awgData,
         conduitData: conduitData,
         tax: tax,
-        taxAmount: taxAmount,
+        taxAmountAWG: taxAmountAWG,
+        grandTotalAWG: grandTotalAWG,
+        taxAmountConduit: taxAmountConduit,
+        grandTotalConduit: grandTotalConduit,
+        taxAmountTotal: taxAmountTotal,
         grandTotal: grandTotal,
         awgTotal: awgTotal,  // Add AWG total
         conduitTotal: conduitTotal,  // Add Conduit total
