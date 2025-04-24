@@ -137,10 +137,10 @@ def estimate_awg_cond():
         awg_data = data.get('awgData', [])  # Default to empty list
         conduit_data = data.get('conduitData', [])  # Default to empty list
         tax = data.get('tax', 0)  # Default to 0
-        tax_amount = data.get('taxAmountTotal', 0)  # Default to 0
+        tax_amount = data.get('taxAmount', 0)  # Default to 0
         grand_total = data.get('grandTotal', 0)  # Default to 0
-        awg_total = data.get('grandTotalAWG', 0)  # Default to 0
-        conduit_total = data.get('grandTotalConduit', 0)  # Default to 0
+        awg_total = data.get('awgTotal', 0)  # Default to 0
+        conduit_total = data.get('conduitTotal', 0)  # Default to 0
         notes_awg = data.get('notes_awg', '')  # Default to empty string
         notes_conduit = data.get('notes_conduit', '')  # Default to empty string
 
@@ -246,10 +246,10 @@ def estimate_misc_equip():
         misc_data = data.get('miscData', [])  # Default to empty list
         equipment_data = data.get('equipmentData', [])  # Default to empty list
         tax = data.get('tax', 0)  # Default to 0
-        tax_amount = data.get('taxAmountTotal', 0)  # Default to 0
+        tax_amount = data.get('taxAmount', 0)  # Default to 0
         grand_total = data.get('grandTotal', 0)  # Default to 0
-        misc_total = data.get('grandTotalMisc', 0)  # Default to 0
-        equipment_total = data.get('grandTotalEquipment', 0)  # Default to 0
+        misc_total = data.get('miscTotal', 0)  # Default to 0
+        equipment_total = data.get('equipmentTotal', 0)  # Default to 0
         notes_misc = data.get('notes_misc', '')  # Default to empty string
         notes_equip = data.get('notes_equip', '')  # Default to empty string
 
