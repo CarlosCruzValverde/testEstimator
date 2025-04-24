@@ -246,10 +246,10 @@ def estimate_misc_equip():
         misc_data = data.get('miscData', [])  # Default to empty list
         equipment_data = data.get('equipmentData', [])  # Default to empty list
         tax = data.get('tax', 0)  # Default to 0
-        tax_amount = data.get('taxAmount', 0)  # Default to 0
+        tax_amount = data.get('taxAmountTotal', 0)  # Default to 0
         grand_total = data.get('grandTotal', 0)  # Default to 0
-        misc_total = data.get('miscTotal', 0)  # Default to 0
-        equipment_total = data.get('equipmentTotal', 0)  # Default to 0
+        misc_total = data.get('grandTotalMisc', 0)  # Default to 0
+        equipment_total = data.get('grandTotalEquipment', 0)  # Default to 0
         notes_misc = data.get('notes_misc', '')  # Default to empty string
         notes_equip = data.get('notes_equip', '')  # Default to empty string
 
