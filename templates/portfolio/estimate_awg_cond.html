@@ -90,7 +90,7 @@
                     </div>
                 </div>
                 <button type="button" id="add-awg" class="add-button">+ Add AWG</button>
-                <div class="total" id="awg-total">Total AWG Cost: $0.00</div>
+                <div class="total" id="awg-subtotal">Total AWG Cost: $0.00</div>
                 <div class="input-group">
                     <label for="notes_awg">Notes Wire (optional)</label>
                     <textarea id="notes_awg" placeholder="Enter additional notes (300 Character limit)" maxlength="300"
@@ -113,8 +113,8 @@
                                     step="0.01">
                             </div>
                             <div class="input-with-label">
-                                <label for="conduit-three-fourth-length">Qty (units)</label>
-                                <input type="number" id="conduit-three-fourth-length" placeholder="qty (units)"
+                                <label for="conduit-three-fourth-length">Length (feet)</label>
+                                <input type="number" id="conduit-three-fourth-length" placeholder="Length (feet)"
                                     step="any">
                             </div>
                         </div>
@@ -128,8 +128,8 @@
                                 <input type="number" id="conduit-one-cost" placeholder="Cost per foot ($)" step="0.01">
                             </div>
                             <div class="input-with-label">
-                                <label for="conduit-one-length">Qty (units)</label>
-                                <input type="number" id="conduit-one-length" placeholder="qty (units)" step="any">
+                                <label for="conduit-one-length">Length (feet)</label>
+                                <input type="number" id="conduit-one-length" placeholder="Length (feet)" step="any">
                             </div>
                         </div>
                         <div class="subtotal" id="conduit-one-subtotal">Subtotal: $0.00</div>
@@ -143,8 +143,8 @@
                                     step="0.01">
                             </div>
                             <div class="input-with-label">
-                                <label for="conduit-one-quarter-length">Qty (units)</label>
-                                <input type="number" id="conduit-one-quarter-length" placeholder="qty (units)"
+                                <label for="conduit-one-quarter-length">Length (feet)</label>
+                                <input type="number" id="conduit-one-quarter-length" placeholder="Length (feet)"
                                     step="any">
                             </div>
                         </div>
@@ -159,8 +159,8 @@
                                     step="0.01">
                             </div>
                             <div class="input-with-label">
-                                <label for="conduit-one-half-length">Qty (units)</label>
-                                <input type="number" id="conduit-one-half-length" placeholder="qty (units)"
+                                <label for="conduit-one-half-length">Length (feet)</label>
+                                <input type="number" id="conduit-one-half-length" placeholder="Length (feet)"
                                     step="any">
                             </div>
                         </div>
@@ -174,15 +174,15 @@
                                 <input type="number" id="conduit-two" placeholder="Cost per foot ($)" step="0.01">
                             </div>
                             <div class="input-with-label">
-                                <label for="conduit-two-length">Qty (units)</label>
-                                <input type="number" id="conduit-two-length" placeholder="qty (units)" step="any">
+                                <label for="conduit-two-length">Length (feet)</label>
+                                <input type="number" id="conduit-two-length" placeholder="Length (feet)" step="any">
                             </div>
                         </div>
                         <div class="subtotal" id="conduit-two-subtotal">Subtotal: $0.00</div>
                     </div>
                 </div>
                 <button type="button" id="add-conduit" class="add-button">+ Add Conduit</button>
-                <div class="total" id="conduit-total">Total Conduit Cost: $0.00</div>
+                <div class="total" id="conduit-subtotal">Total Conduit Cost: $0.00</div>
                 <div class="input-group">
                     <label for="notes_conduit">Notes Conduit (optional)</label>
                     <textarea id="notes_conduit" placeholder="Enter additional notes (300 Character limit)"
@@ -195,11 +195,25 @@
         <div class="tax-grand-total">
             <div class="input-group">
                 <label for="tax">TAX (%)</label>
-                <input type="number" id="tax" placeholder="Enter TAX percentage" value="9.5" step="0.1" required>
+                <input type="number" id="tax" placeholder="Enter TAX percentage" value="9.5" step="0.01" required>
             </div>
-            <div class="result">
-                <h2>TAX Amount: <span id="tax-amount">$0.00</span></h2>
-                <h2>Grand Total (including TAX): <span id="grand-total">$0.00</span></h2>
+        </div>
+        <div class="columns">
+            <!-- Column 1: AWG -->
+            <div class="column">
+                <div class="result">
+                    <h2>TAX Amount: <span id="tax-amountAWG">$0.00</span></h2>
+                    <h2>Grand Total <span style="font-weight: bold;">AWG</span> (incl. TAX): <span
+                            id="awg-total">$0.00</span></h2>
+                </div>
+            </div>
+            <!-- Column 2: Conduit -->
+            <div class="column">
+                <div class="result">
+                    <h2>TAX Amount: <span id="tax-amountConduit">$0.00</span></h2>
+                    <h2>Grand Total <span style="font-weight: bold;">Conduit</span> (incl. TAX): <span
+                            id="conduit-total">$0.00</span></h2>
+                </div>
             </div>
         </div>
 
