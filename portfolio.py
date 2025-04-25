@@ -476,6 +476,7 @@ def get_estimation_data():
     
     return jsonify({
         'success': True,
+        'tax_percentage': cost_estimation.tax_percentage,
         'awg_total': cost_estimation.awg_total,
         'conduit_total': cost_estimation.conduit_total,
         'misc_total': misc_estimation.misc_total,
@@ -903,6 +904,12 @@ def update_cost_estimation(project_id):
             flash('No cost estimation found for this project', 'danger')
             return redirect(url_for('portfolio.project_review', project_id=project_id))
 
+        p_summary = project.summaries.first()
+
+        if not p_summary:
+            flash('No project summaries found for this project', 'danger')
+            return redirect(url_for('portfolio.project_review', project_id=project_id))
+
         awg_total = 0.0
         conduit_total = 0.0
         
@@ -932,13 +939,17 @@ def update_cost_estimation(project_id):
             
         # Update tax and totals
         tax_percentage = normalize_float(request.form.get('tax_percentage'))
+        awg_base_cost = normalize_float(awg_total + (awg_total * (tax_percentage / 100)))
+        conduit_base_cost = normalize_float(conduit_total + (conduit_total * (tax_percentage / 100)))
         subtotal = normalize_float(awg_total + conduit_total)
         tax_amount = normalize_float(subtotal * (tax_percentage / 100))
         grand_total = normalize_float(subtotal + tax_amount)
         
         cost_estimation.tax_percentage = tax_percentage
         cost_estimation.awg_total = awg_total
+        p_summary.awg_base_cost = awg_base_cost 
         cost_estimation.conduit_total = conduit_total
+        p_summary.conduit_base_cost = conduit_base_cost
         cost_estimation.tax_amount = tax_amount
         cost_estimation.grand_total = grand_total
 
@@ -971,6 +982,12 @@ def update_misc_equipment(project_id):
         if not misc_equip:
             flash('No miscellaneous/equipment estimation found for this project', 'danger')
             return redirect(url_for('portfolio.project_review', project_id=project_id, _anchor='misc-equipment'))
+
+        p_summary = project.summaries.first()
+
+        if not p_summary:
+            flash('No project summaries found for this project', 'danger')
+            return redirect(url_for('portfolio.project_review', project_id=project_id))
         
         misc_total = 0.0
         equipment_total = 0.0
@@ -1001,12 +1018,16 @@ def update_misc_equipment(project_id):
         
         # Update tax and totals
         tax_percentage = normalize_float(request.form.get('tax_percentage'))
+        misc_base_cost = normalize_float(misc_total + (misc_total * (tax_percentage / 100)))
+        equipment_base_cost = normalize_float(equipment_total + (equipment_total * (tax_percentage / 100)))
         subtotal = normalize_float(misc_total + equipment_total)
         tax_amount = normalize_float(subtotal * (tax_percentage / 100))
         grand_total = normalize_float(subtotal + tax_amount)
         
         misc_equip.misc_total = misc_total
+        p_summary.misc_base_cost = misc_base_cost 
         misc_equip.equipment_total = equipment_total
+        p_summary.equipment_base_cost = equipment_base_cost
         misc_equip.tax_percentage = tax_percentage
         misc_equip.tax_amount = tax_amount
         misc_equip.grand_total = grand_total
@@ -1115,32 +1136,6 @@ def update_summary(project_id):
 
         # Refresh base costs from related tables before updating
         _refresh_summary_base_costs(project, summary)
-        """Refresh all base costs in project summary from related estimation tables"""
-        # Refresh from cost_estimations (AWG and Conduit)
-        cost_estimation = project.cost_estimations.order_by(CostEstimation.created_at.desc()).first()
-        if cost_estimation:
-            summary.awg_base_cost = cost_estimation.awg_total or 0
-            summary.conduit_base_cost = cost_estimation.conduit_total or 0
-            current_app.logger.debug(f"Updated AWG base: {summary.awg_base_cost}, Conduit base: {summary.conduit_base_cost}")
-
-        # Refresh from misc_equipment_estimations
-        misc_equipment = project.misc_equipment_estimations.order_by(MiscEquipmentEstimation.created_at.desc()).first()
-        if misc_equipment:
-            summary.misc_base_cost = misc_equipment.misc_total or 0
-            summary.equipment_base_cost = misc_equipment.equipment_total or 0
-            current_app.logger.debug(f"Updated Misc base: {summary.misc_base_cost}, Equipment base: {summary.equipment_base_cost}")
-
-        # Refresh from labor_cost_estimations
-        labor_cost = project.labor_cost_estimations.order_by(LaborCostEstimation.created_at.desc()).first()
-        if labor_cost:
-            summary.labor_base_cost = labor_cost.labor_total or 0
-            summary.low_voltage_base_cost = labor_cost.low_voltage_total or 0
-            current_app.logger.debug(f"Updated Labor base: {summary.labor_base_cost}, Low Voltage base: {summary.low_voltage_base_cost}")
-
-        # Ensure we have the latest charger info
-        if labor_cost:
-            summary.chargers_count = labor_cost.chargers_count or 0
-            summary.price_per_charger = labor_cost.charger_price or 0
 
         # Update markups and percentages
         summary.awg_markup = validate_positive_float(request.form.get('awg_markup'), "AWG markup", min_value=1.0)
@@ -1184,16 +1179,12 @@ def update_summary(project_id):
 def _refresh_summary_base_costs(project, summary):
     """Refresh base costs from related tables"""
     # Get latest cost estimation
-    cost_estimation = project.cost_estimations.first()
-    if cost_estimation:
-        summary.awg_base_cost = cost_estimation.awg_total or 0
-        summary.conduit_base_cost = cost_estimation.conduit_total or 0
-    
-    # Get latest misc equipment estimation
-    misc_equipment = project.misc_equipment_estimations.first()
-    if misc_equipment:
-        summary.misc_base_cost = misc_equipment.misc_total or 0
-        summary.equipment_base_cost = misc_equipment.equipment_total or 0
+    project_summary = project.summaries.first()  # Changed from project_summaries to summaries
+    if project_summary:
+        summary.awg_base_cost = project_summary.awg_base_cost or 0
+        summary.conduit_base_cost = project_summary.conduit_base_cost or 0
+        summary.misc_base_cost = project_summary.misc_base_cost or 0
+        summary.equipment_base_cost = project_summary.equipment_base_cost or 0
     
     # Get latest labor cost estimation
     labor_cost = project.labor_cost_estimations.first()
