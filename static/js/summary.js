@@ -6,6 +6,25 @@ function formatCurrency(value) {
     });
 }
 
+// Precise calculation helper (handles floating-point issues)
+function calculateWithTax(baseValue, percentage) {
+    // Convert to cents (integers) to avoid floating-point errors
+    const baseInCents = Math.round(baseValue * 100);
+    const taxInCents = Math.round(baseInCents * (percentage || 0) / 100);
+    const totalInCents = baseInCents + taxInCents;
+
+    // Convert back to dollars
+    return totalInCents / 100;
+}
+
+let calculatedBaseCosts = {
+    awg: 0,
+    conduit: 0,
+    misc: 0,
+    equipment: 0
+};
+
+
 document.addEventListener('DOMContentLoaded', function () {
     // Load existing data from previous estimations
     loadEstimationData();
@@ -21,11 +40,17 @@ function loadEstimationData() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Populate base costs
-                document.getElementById('awg-base-cost').textContent = `$${formatCurrency(data.awg_total)}`;
-                document.getElementById('conduit-base-cost').textContent = `$${formatCurrency(data.conduit_total)}`;
-                document.getElementById('misc-base-cost').textContent = `$${formatCurrency(data.misc_total)}`;
-                document.getElementById('equipment-base-cost').textContent = `$${formatCurrency(data.equipment_total)}`;
+                // Calculate all base costs with precise tax calculations
+                calculatedBaseCosts.awg = calculateWithTax(data.awg_total, data.tax_percentage);
+                calculatedBaseCosts.conduit = calculateWithTax(data.conduit_total, data.tax_percentage);
+                calculatedBaseCosts.misc = calculateWithTax(data.misc_total, data.tax_percentage);
+                calculatedBaseCosts.equipment = calculateWithTax(data.equipment_total, data.tax_percentage);
+
+                // Populate base costs using stored values
+                document.getElementById('awg-base-cost').textContent = `$${formatCurrency(calculatedBaseCosts.awg)}`;
+                document.getElementById('conduit-base-cost').textContent = `$${formatCurrency(calculatedBaseCosts.conduit)}`;
+                document.getElementById('misc-base-cost').textContent = `$${formatCurrency(calculatedBaseCosts.misc)}`;
+                document.getElementById('equipment-base-cost').textContent = `$${formatCurrency(calculatedBaseCosts.equipment)}`;
                 document.getElementById('labor-base-cost').textContent = `$${formatCurrency(data.labor_total)}`;
                 document.getElementById('low-voltage-base-cost').textContent = `$${formatCurrency(data.low_voltage_total)}`;
 
@@ -213,25 +238,25 @@ document.getElementById('summaryForm').addEventListener('submit', function (e) {
         project_id: document.getElementById('projectId').value,
 
         // AWG
-        awg_base_cost: parseFloat(document.getElementById('awg-base-cost').textContent.replace(/[^0-9.-]/g, '')) || 0,
+        awg_base_cost: calculatedBaseCosts.awg,
         awg_markup: parseFloat(document.getElementById('awg-markup').value) || 1.0,
         awg_subtotal: parseFloat(document.getElementById('awg-subtotal').textContent.replace(/[^0-9.-]/g, '')) || 0,
         awg_profit: parseFloat(document.getElementById('awg-profit').textContent.replace(/[^0-9.-]/g, '')) || 0,
 
         // Conduit
-        conduit_base_cost: parseFloat(document.getElementById('conduit-base-cost').textContent.replace(/[^0-9.-]/g, '')) || 0,
+        conduit_base_cost: calculatedBaseCosts.conduit,
         conduit_markup: parseFloat(document.getElementById('conduit-markup').value) || 1.0,
         conduit_subtotal: parseFloat(document.getElementById('conduit-subtotal').textContent.replace(/[^0-9.-]/g, '')) || 0,
         conduit_profit: parseFloat(document.getElementById('conduit-profit').textContent.replace(/[^0-9.-]/g, '')) || 0,
 
         // Miscellaneous
-        misc_base_cost: parseFloat(document.getElementById('misc-base-cost').textContent.replace(/[^0-9.-]/g, '')) || 0,
+        misc_base_cost: calculatedBaseCosts.misc,
         misc_markup: parseFloat(document.getElementById('misc-markup').value) || 1.0,
         misc_subtotal: parseFloat(document.getElementById('misc-subtotal').textContent.replace(/[^0-9.-]/g, '')) || 0,
         misc_profit: parseFloat(document.getElementById('misc-profit').textContent.replace(/[^0-9.-]/g, '')) || 0,
 
         // Equipment
-        equipment_base_cost: parseFloat(document.getElementById('equipment-base-cost').textContent.replace(/[^0-9.-]/g, '')) || 0,
+        equipment_base_cost: calculatedBaseCosts.equipment,
         equipment_markup: parseFloat(document.getElementById('equipment-markup').value) || 1.0,
         equipment_subtotal: parseFloat(document.getElementById('equipment-subtotal').textContent.replace(/[^0-9.-]/g, '')) || 0,
         equipment_profit: parseFloat(document.getElementById('equipment-profit').textContent.replace(/[^0-9.-]/g, '')) || 0,
