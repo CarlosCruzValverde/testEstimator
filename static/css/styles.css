@@ -620,6 +620,12 @@ header p {
     color: navy;
 }
 
+#price-per-charger {
+    font-size: 2.0rem;
+    font-weight: bold;
+    color: navy;
+}
+
 #chargers-count-view {
     font-size: 2.0rem;
     font-weight: bold;
