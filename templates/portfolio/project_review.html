@@ -108,11 +108,20 @@
                                 <div>
                                     <span class="info-label">Status</span>
                                     <span
-                                        class="info-value {% if project.summaries.first() and project.summaries.first().approved %}text-success{% else %}text-danger{% endif %}">
-                                        {% if project.summaries.first() and project.summaries.first().approved %}
+                                        class="info-value 
+                                        {% if summary.approved is none %}
+                                            text-warning
+                                        {% elif summary.approved %}
+                                            text-success
+                                        {% else %}
+                                            text-danger
+                                        {% endif %}">
+                                        {% if summary.approved is none %}
+                                        Pending
+                                        {% elif summary.approved %}
                                         Approved
                                         {% else %}
-                                        Not Approved
+                                        Rejected
                                         {% endif %}
                                     </span>
                                 </div>
