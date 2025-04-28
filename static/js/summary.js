@@ -117,8 +117,7 @@ function calculateAllTotals() {
     // Calculate grand totals
     calculateGrandTotals();
 
-    // Calculate price per charger
-    calculatePricePerCharger(grandTotal);
+    calculatePricePerChargerFromSubmitted();
 }
 
 function calculateCategoryTotal(category) {
