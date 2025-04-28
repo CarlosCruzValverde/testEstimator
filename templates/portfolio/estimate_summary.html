@@ -136,17 +136,27 @@
 
         <!-- Approval Status -->
         <div class="approval-section">
-            <span class="approval-label">Approved:</span>
+            <span class="approval-label">Approval Status:</span>
             <div class="approval-options">
+                <!-- Approved -->
                 <label class="radio-option">
                     <input type="radio" name="approved" value="true" id="approved-yes">
                     <span class="radio-checkmark"></span>
                     <span class="radio-text">Yes</span>
                 </label>
+
+                <!-- Rejected -->
                 <label class="radio-option">
                     <input type="radio" name="approved" value="false" id="approved-no">
                     <span class="radio-checkmark"></span>
                     <span class="radio-text">No</span>
+                </label>
+
+                <!-- Pending (New Option) -->
+                <label class="radio-option">
+                    <input type="radio" name="approved" value="" id="approved-pending" checked>
+                    <span class="radio-checkmark"></span>
+                    <span class="radio-text">Pending</span>
                 </label>
             </div>
         </div>
