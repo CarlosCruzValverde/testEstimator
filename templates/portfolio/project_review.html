@@ -893,9 +893,22 @@
 
                     <!-- Approval Status -->
                     <div class="approval-section mb-4">
-                        <span class="approval-label">Approved:</span>
-                        <span class="info-value {% if summary.approved %}text-success{% else %}text-danger{% endif %}">
-                            {% if summary.approved %}Approved{% else %}Not Approved{% endif %}
+                        <span class="approval-label">Approval Status:</span>
+                        <span class="info-value 
+                            {% if summary.approved is none %}
+                                text-warning
+                            {% elif summary.approved %}
+                                text-success
+                            {% else %}
+                                text-danger
+                            {% endif %}">
+                            {% if summary.approved is none %}
+                            Pending
+                            {% elif summary.approved %}
+                            Approved
+                            {% else %}
+                            Rejected
+                            {% endif %}
                         </span>
                     </div>
 
@@ -1094,19 +1107,30 @@
                     </div>
 
                     <div class="approval-section">
-                        <span class="approval-label">Approved:</span>
+                        <span class="approval-label">Approval Status:</span>
                         <div class="approval-options">
+                            <!-- Approved -->
                             <label class="radio-option">
-                                <input type="radio" name="approved" value="true" {% if summary.approved %}checked{%
-                                    endif %}>
+                                <input type="radio" name="approved" value="true" {% if summary.approved==True
+                                    %}checked{% endif %}>
                                 <span class="radio-checkmark"></span>
                                 <span class="radio-text">Yes</span>
                             </label>
+
+                            <!-- Rejected -->
                             <label class="radio-option">
-                                <input type="radio" name="approved" value="false" {% if not summary.approved %}checked{%
-                                    endif %}>
+                                <input type="radio" name="approved" value="false" {% if summary.approved==False
+                                    %}checked{% endif %}>
                                 <span class="radio-checkmark"></span>
                                 <span class="radio-text">No</span>
+                            </label>
+
+                            <!-- Pending -->
+                            <label class="radio-option">
+                                <input type="radio" name="approved" value="" {% if summary.approved is none %}checked{%
+                                    endif %}>
+                                <span class="radio-checkmark"></span>
+                                <span class="radio-text">Pending</span>
                             </label>
                         </div>
                     </div>
