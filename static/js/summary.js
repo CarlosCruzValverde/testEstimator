@@ -93,6 +93,9 @@ function setupEventListeners() {
     // Percentage inputs for tax and overhead
     document.getElementById('tax-percentage').addEventListener('input', calculateAllTotals);
     document.getElementById('overhead-percentage').addEventListener('input', calculateAllTotals);
+
+    // listener for total-submitted input
+    document.getElementById('total-submitted').addEventListener('input', calculateAllTotals);
 }
 
 function calculateAllTotals() {
@@ -218,14 +221,29 @@ function calculateGrandTotals() {
     calculatePricePerCharger(grandTotal1);
 }
 
-function calculatePricePerCharger(grandTotal) {
+function calculatePricePerCharger(grandTotal1) {
     const chargersCount = parseInt(document.getElementById('chargers-count').textContent) || 0;
 
     if (chargersCount > 0) {
-        const pricePerCharger = grandTotal / chargersCount;
+        const pricePerCharger = grandTotal1 / chargersCount;
         document.getElementById('price-per-charger').textContent = `$${formatCurrency(pricePerCharger)}`;
     } else {
         document.getElementById('price-per-charger').textContent = '$0.00';
+    }
+}
+
+function calculatePricePerChargerFromSubmitted() {
+    const chargersCount = parseInt(document.getElementById('chargers-count').textContent) || 0;
+    const totalSubmitted = parseFloat(document.getElementById('total-submitted').value) || 0;
+    const lowVoltageBaseCost = parseFloat(
+        document.getElementById('low-voltage-base-cost').textContent.replace(/[^0-9.-]/g, '')
+    ) || 0;
+
+    if (chargersCount > 0 && totalSubmitted > 0) {
+        const pricePerCharger = (totalSubmitted - lowVoltageBaseCost) / chargersCount;
+        document.getElementById('price-per-charger-submitted').textContent = `$${formatCurrency(pricePerCharger)}`;
+    } else {
+        document.getElementById('price-per-charger-submitted').textContent = '$0.00';
     }
 }
 
@@ -301,6 +319,8 @@ document.getElementById('summaryForm').addEventListener('submit', function (e) {
 
         total_submitted: parseFloat(document.getElementById('total-submitted').value) || 0,
         approved_amount: parseFloat(document.getElementById('approved-amount').value) || 0,
+
+        price_per_charger_submitted: parseFloat(document.getElementById('price-per-charger-submitted').textContent.replace(/[$,]/g, '')) || 0,
 
         // Notes
         notes: document.getElementById('summary-notes').value
