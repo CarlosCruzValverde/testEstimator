@@ -327,6 +327,15 @@ header p {
     margin-bottom: 0.5rem;
 }
 
+#tax-amountAWG,
+#tax-amountConduit,
+#awg-grandtotal,
+#conduit-grandtotal {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #27ae60;
+}
+
 #tax-amount,
 #grand-total {
     font-size: 1.75rem;
