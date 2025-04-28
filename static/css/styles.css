@@ -336,6 +336,15 @@ header p {
     color: #27ae60;
 }
 
+#tax-amountMisc,
+#tax-amountEquipment,
+#misc-grandtotal,
+#equipment-grandtotal {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #27ae60;
+}
+
 #tax-amount,
 #grand-total {
     font-size: 1.75rem;
