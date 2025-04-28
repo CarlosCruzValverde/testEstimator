@@ -561,8 +561,17 @@ def save_summary():
             if field in data:
                 try:
                     # Convert to appropriate type
-                    if field in ['approved']:
-                        setattr(summary, field, int(data[field]) if data[field] is not None else None)
+                    if field == 'approved':
+                        val = data.get(field)
+                        if val == 'true':
+                            setattr(summary, field, True)
+                        elif val == 'false':
+                            setattr(summary, field, False)
+                        elif val == 'null' or val is None:
+                            setattr(summary, field, None)  # Explicit NULL for database
+                        else:
+                            # Handle unexpected values
+                            setattr(summary, field, None)
                     elif any(x in field for x in ['_cost', '_subtotal', '_profit', '_total', '_percentage']):
                         setattr(summary, field, float(data[field]))
                     else:
@@ -706,7 +715,7 @@ def projects():
             'status': project.status,
             'chargers_count': labor_map.get(project.id, {}).chargers_count if labor_map.get(project.id)
              else None,
-            'approved': project_summary.approved if project_summary else None,
+            'approved': project_summary.approved if (project_summary and project_summary.approved is not None) else None,
             'project_summary_exists': project_summary is not None,
             'approved_amount': project_summary.approved_amount if project_summary else None,
             'total_submitted': project_summary.total_submitted if project_summary else None,
@@ -1154,7 +1163,13 @@ def update_summary(project_id):
         summary.overhead_percentage = validate_positive_float(request.form.get('overhead_percentage'), "Overhead percentage")
 
         # Update approval status
-        summary.approved = request.form.get('approved') == 'true'
+        approved_value = request.form.get('approved')
+        if approved_value == 'true':
+            summary.approved = True
+        elif approved_value == 'false':
+            summary.approved = False
+        else:
+            summary.approved = None  # NULL for Pending state
         summary.total_submitted = validate_positive_float(request.form.get('total_submitted', 0), "Total submitted")
         summary.approved_amount = validate_positive_float(request.form.get('approved_amount', 0), "Approved amount")
         summary.notes = request.form.get('notes', '')
