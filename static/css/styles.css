@@ -1047,7 +1047,7 @@ header p {
 /* Media queries for different resolutions */
 @media screen and (min-width: 1920px) {
     .container {
-        max-width: 1400px;
+        max-width: 1600px;
         padding: 3rem;
     }
 }
