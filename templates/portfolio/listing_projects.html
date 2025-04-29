@@ -73,6 +73,7 @@
                             <th>Approved</th>
                             <th>Amount</th>
                             <th>Price per-charger</th>
+                            <th>Price per-charger submitted</th>
                             <th>Status</th>
                             <th>Actions</th>
                             <th>Delete</th>
@@ -121,6 +122,17 @@
                                 {% if project.approved_amount is not none %}
                                 <span style="color:green">
                                     ${{ "{:,.2f}".format(project.approved_amount) }}
+                                </span>
+                                {% else %}
+                                <span style="color: red">
+                                    N/A
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if project.price_per_charger_submitted is not none %}
+                                <span style="color: navy">
+                                    ${{ "{:,.2f}".format(project.price_per_charger_submitted) }}
                                 </span>
                                 {% else %}
                                 <span style="color: red">
