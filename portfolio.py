@@ -1172,8 +1172,15 @@ def update_summary(project_id):
             summary.approved = False
         else:
             summary.approved = None  # NULL for Pending state
+            
         summary.total_submitted = validate_positive_float(request.form.get('total_submitted', 0), "Total submitted")
         summary.approved_amount = validate_positive_float(request.form.get('approved_amount', 0), "Approved amount")
+
+        # Update price_per_charger_submitted
+        summary.price_per_charger_submitted = validate_positive_float(
+            request.form.get('price_per_charger_submitted', 0), "Price per charger (from total submitted)"
+        )
+        
         summary.notes = request.form.get('notes', '')
 
         # Recalculate all values (including price_per_charger)
@@ -1281,6 +1288,16 @@ def _recalculate_summary_totals(summary):
         )
     else:
         summary.price_per_charger = 0.0
+
+    # Calculate price_per_charger_submitted
+    if summary.total_submitted and summary.low_voltage_base_cost and summary.project.labor_cost_estimations.first():
+        chargers_count = summary.project.labor_cost_estimations.first().chargers_count
+        if chargers_count > 0:
+            summary.price_per_charger_submitted = (summary.total_submitted - summary.low_voltage_base_cost) / chargers_count
+        else:
+            summary.price_per_charger_submitted = 0
+    else:
+        summary.price_per_charger_submitted = 0
 
 
 @bp.route("/portfolio/projects/delete/<int:project_id>", methods=["POST"])
