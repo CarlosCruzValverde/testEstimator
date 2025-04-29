@@ -207,6 +207,7 @@ class ProjectSummary(db.Model):
     
     # Charger Information
     price_per_charger = db.Column(db.Float, default=0.0)
+    price_per_charger_submitted = db.Column(db.Float, default=0.0)
     
     # Approval
     approved = db.Column(db.Boolean, nullable=True)
