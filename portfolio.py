@@ -720,7 +720,8 @@ def projects():
             'project_summary_exists': project_summary is not None,
             'approved_amount': project_summary.approved_amount if project_summary else None,
             'total_submitted': project_summary.total_submitted if project_summary else None,
-            'price_per_charger': project_summary.price_per_charger if project_summary else None
+            'price_per_charger': project_summary.price_per_charger if project_summary else None,
+            'price_per_charger_submitted': project_summary.price_per_charger_submitted if project_summary else None
         }
         project_list.append(project_data)
 
