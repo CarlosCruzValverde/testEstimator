@@ -1159,7 +1159,7 @@
                     <div class="summary-breakdown mb-3">
                         <div class="breakdown-row mb-2">
                             <label class="fw-bold">Total Submitted:</label>
-                            <input type="number" step="0.01" min="0" name="total_submitted"
+                            <input type="number" step="0.01" min="0" id="total-submitted" name="total_submitted"
                                 value="{{ summary.total_submitted if summary.total_submitted else 0 }}"
                                 class="form-control form-control-sm d-inline-block w-auto">
                         </div>
@@ -1168,6 +1168,20 @@
                             <input type="number" step="0.01" min="0" name="approved_amount"
                                 value="{{ summary.approved_amount if summary.approved_amount else 0 }}"
                                 class="form-control form-control-sm d-inline-block w-auto">
+                        </div>
+                    </div>
+
+                    <div class="charger-info mb-3">
+                        <div class="charger-row mb-2">
+                            <span class="charger-label">
+                                Price Per Charger From Total Submitted (Low Voltage Not Included):
+                                <span style="font-size: 1.5em;">
+                                    <strong id="price-per-charger-submitted" style="color: navy;">
+                                        {{ summary.price_per_charger_submitted | currency if summary.price_per_charger_submitted else "0.00"
+                                        }}
+                                    </strong>
+                                </span>
+                            </span>
                         </div>
                     </div>
 
@@ -1267,6 +1281,8 @@
             calculateSummaryIncomeTax();
             calculateSummaryOverheadMargin();
             calculateSummaryGrandTotals();
+            
+            calculatePricePerChargerFromSubmitted();
         }
 
         function formatCurrency(value) {
@@ -1414,6 +1430,25 @@
                 document.getElementById('price-per-charger').textContent = '$0.00';
             }
         }
+
+        // Function to calculate price-per-charger-submitted
+        function calculatePricePerChargerFromSubmitted() {
+            const chargersCount = parseInt(document.getElementById('chargers-count').textContent) || 0;
+            const totalSubmitted = parseFloat(document.getElementById('total-submitted').value) || 0;
+            const lowVoltageBaseCost = parseFloat(
+                document.getElementById('low-voltage-base-cost').textContent.replace(/[^0-9.-]/g, '')
+            ) || 0;
+        
+            if (chargersCount > 0 && totalSubmitted > 0) {
+                const pricePerCharger = (totalSubmitted - lowVoltageBaseCost) / chargersCount;
+                document.getElementById('price-per-charger-submitted').textContent = `$${formatCurrency(pricePerCharger)}`;
+            } else {
+                document.getElementById('price-per-charger-submitted').textContent = '$0.00';
+            }
+        }
+
+        // Event listener for total_submitted input
+        document.getElementById('total-submitted').addEventListener('input', calculatePricePerChargerFromSubmitted);
 
 
         // Real-time calculations for cost estimation
