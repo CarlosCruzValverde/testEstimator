@@ -1045,6 +1045,10 @@ header p {
 
 /* Media queries for different resolutions */
 @media screen and (min-width: 1920px) {
+    body {
+        margin-top: 60px; /* More space for navigation */
+    }
+    
     .container {
         width: 95%; /* Allows for a larger width while maintaining margins */
         max-width: 1800px; /* Increase max-width for better coverage on wider screens */
