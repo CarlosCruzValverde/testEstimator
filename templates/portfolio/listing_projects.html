@@ -130,9 +130,9 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if project.price_per_charger_submitted is not none %}
+                                {% if project.price_per_charger is not none %}
                                 <span style="color: navy">
-                                    ${{ "{:,.2f}".format(project.price_per_charger_submitted) }}
+                                    ${{ "{:,.2f}".format(project.price_per_charger) }}
                                 </span>
                                 {% else %}
                                 <span style="color: red">
@@ -141,9 +141,9 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if project.price_per_charger is not none %}
+                                {% if project.price_per_charger_submitted is not none %}
                                 <span style="color: navy">
-                                    ${{ "{:,.2f}".format(project.price_per_charger) }}
+                                    ${{ "{:,.2f}".format(project.price_per_charger_submitted) }}
                                 </span>
                                 {% else %}
                                 <span style="color: red">
