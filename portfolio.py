@@ -503,7 +503,7 @@ def save_summary():
         numeric_fields = [
             'awg_subtotal', 'conduit_subtotal', 'misc_subtotal', 'equipment_subtotal',
             'labor_subtotal', 'low_voltage_subtotal', 'permits_subtotal',
-            'tax_subtotal', 'overhead_subtotal', 'grand_subtotal', 'grand_total', 'price_per_charger', 'total_submitted', 'approved_amount', 'price-per-charger-submitted'
+            'tax_subtotal', 'overhead_subtotal', 'grand_subtotal', 'grand_total', 'price_per_charger', 'total_submitted', 'approved_amount', 'price_per_charger_submitted'
         ]
 
         if not all(isinstance(data.get(field), (float, int)) for field in numeric_fields if field in data):
@@ -552,7 +552,7 @@ def save_summary():
             # Amount
             'total_submitted',
             'approved_amount',
-            'price-per-charger-submitted',
+            'price_per_charger_submitted',
             # Notes
             'notes'
         ]   
