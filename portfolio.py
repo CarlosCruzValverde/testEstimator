@@ -1290,7 +1290,7 @@ def _recalculate_summary_totals(summary):
         summary.price_per_charger = 0.0
 
     # Calculate price_per_charger_submitted
-    if summary.total_submitted and summary.low_voltage_base_cost and summary.project.labor_cost_estimations.first():
+    if summary.total_submitted and summary.project.labor_cost_estimations.first():
         chargers_count = summary.project.labor_cost_estimations.first().chargers_count
         if chargers_count > 0:
             total_submitted_without_low_voltage = normalize_float(summary.total_submitted - summary.low_voltage_base_cost)
