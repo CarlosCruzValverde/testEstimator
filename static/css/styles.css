@@ -547,8 +547,8 @@ header p {
 }
 
 .summary-breakdown .form-control {
-    height: 2.5em; /* Increase height */
-    font-size: 1.2em; /* Increase font size */
+    height: 3.0em; /* Increase height */
+    font-size: 1.5em; /* Increase font size */
     padding: 0.5em; /* Increase padding */
     width: 200px; /* Set a fixed width or adjust as needed */
 }
@@ -678,15 +678,15 @@ header p {
 /* Target the input elements inside the amount-section */
 .amount-section .form-control {
     width: 200px; /* Adjust the width as needed */
-    height: 2.5em; /* Adjust the height using em */
-    font-size: 1.2em; /* Base font size (relative to parent) */
+    height: 3.0em; /* Adjust the height using em */
+    font-size: 1.5em; /* Base font size (relative to parent) */
     padding: 0.5em; /* Adjust padding using em */
 }
 
 /* Optional: Adjust the size of the input-group-text (the "$" symbol) */
 .amount-section .input-group-text {
-    height: 2.5em; /* Match the height of the input */
-    font-size: 1.2em; /* Match the font size of the input */
+    height: 3.0em; /* Match the height of the input */
+    font-size: 1.5em; /* Match the font size of the input */
 }
 
 /* Approval Section */
