@@ -954,7 +954,7 @@ header p {
 }
 
 .amount-row label {
-    width: 600px;
+    width: 500px;
     font-weight: 500;
     margin-right: 15px;
     color: #613200;
@@ -962,7 +962,7 @@ header p {
 }
 
 .amount-row .input-group {
-    width: 600px;
+    width: 500px;
 }
 
 /* Make sure the inputs look consistent with your other form elements */
@@ -973,7 +973,7 @@ header p {
 
 /* Target the input elements inside the amount-section */
 .amount-section .form-control {
-    width: 300px; /* Adjust the width as needed */
+    width: 250px; /* Adjust the width as needed */
     height: 2.5em; /* Adjust the height using em */
     font-size: 1.2em; /* Base font size (relative to parent) */
     padding: 0.5em; /* Adjust padding using em */
