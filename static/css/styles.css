@@ -675,20 +675,6 @@ header p {
     color: navy;
 }
 
-/* Target the input elements inside the amount-section */
-.amount-section .form-control {
-    width: 300px; /* Adjust the width as needed */
-    height: 2.5em; /* Adjust the height using em */
-    font-size: 1.2em; /* Base font size (relative to parent) */
-    padding: 0.5em; /* Adjust padding using em */
-}
-
-/* Optional: Adjust the size of the input-group-text (the "$" symbol) */
-.amount-section .input-group-text {
-    height: 2.5em; /* Match the height of the input */
-    font-size: 1.2em; /* Match the font size of the input */
-}
-
 /* Approval Section */
 .approval-section {
     margin: 20px 0;
@@ -968,7 +954,7 @@ header p {
 }
 
 .amount-row label {
-    width: 450px;
+    width: 600px;
     font-weight: 500;
     margin-right: 15px;
     color: #613200;
@@ -976,13 +962,27 @@ header p {
 }
 
 .amount-row .input-group {
-    width: 200px;
+    width: 600px;
 }
 
 /* Make sure the inputs look consistent with your other form elements */
 .amount-row input.form-control {
     text-align: right;
     padding: 8px 12px;
+}
+
+/* Target the input elements inside the amount-section */
+.amount-section .form-control {
+    width: 300px; /* Adjust the width as needed */
+    height: 2.5em; /* Adjust the height using em */
+    font-size: 1.2em; /* Base font size (relative to parent) */
+    padding: 0.5em; /* Adjust padding using em */
+}
+
+/* Optional: Adjust the size of the input-group-text (the "$" symbol) */
+.amount-section .input-group-text {
+    height: 2.5em; /* Match the height of the input */
+    font-size: 1.2em; /* Match the font size of the input */
 }
 
 .year-filter {
