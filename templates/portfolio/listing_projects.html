@@ -71,9 +71,9 @@
                             <th>Type</th>
                             <th>Chargers</th>
                             <th>Approved</th>
-                            <th>Amount</th>
-                            <th>Price per-charger</th>
-                            <th>Price per-charger submitted</th>
+                            <th>Amount Approved</th>
+                            <th>Ammount Submitted</th>
+                            <th>Price per-charger Submitted</th>
                             <th>Status</th>
                             <th>Actions</th>
                             <th>Delete</th>
@@ -130,9 +130,9 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if project.price_per_charger is not none %}
+                                {% if project.total_submitted is not none %}
                                 <span style="color: navy">
-                                    ${{ "{:,.2f}".format(project.price_per_charger) }}
+                                    ${{ "{:,.2f}".format(project.total_submitted) }}
                                 </span>
                                 {% else %}
                                 <span style="color: red">
