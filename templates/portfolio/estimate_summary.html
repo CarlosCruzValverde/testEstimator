@@ -163,23 +163,21 @@
 
         <!-- Total Submitted and Approved Amount -->
         <div class="amount-section">
-            <div class="amount-row">
-                <label for="total-submitted" class="fw-bold">Total Submitted:</label>
-                <div class="input-group">
-                    <span class="input-group-text">$</span>
-                    <input type="number" id="total-submitted" name="total_submitted" class="form-control" step="0.1"
-                        min="0" value="0.00">
-                </div>
-            </div>
-            <div class="amount-row">
-                <label for="approved-amount" class="fw-bold">Approved Amount:</label>
-                <div class="input-group">
-                    <span class="input-group-text">$</span>
-                    <input type="number" id="approved-amount" name="approved_amount" class="form-control" step="0.1"
-                        min="0" value="0.00">
-                </div>
-            </div>
+    <div class="amount-row">
+        <label for="total-submitted" class="fw-bold">Total Submitted:</label>
+        <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input type="text" id="total-submitted" name="total_submitted" class="form-control currency-input" value="0.00">
         </div>
+    </div>
+    <div class="amount-row">
+        <label for="approved-amount" class="fw-bold">Approved Amount:</label>
+        <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input type="text" id="approved-amount" name="approved_amount" class="form-control currency-input" value="0.00">
+        </div>
+    </div>
+</div>
 
         <div class="charger-row">
             <span class="charger-label">Price Per Charger <span style="color: brown; font-weight: bold;">From Total
