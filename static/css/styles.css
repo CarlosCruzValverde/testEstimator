@@ -546,6 +546,13 @@ header p {
     font-size: 1.2em;
 }
 
+.summary-breakdown .form-control {
+    height: 2.5em; /* Increase height */
+    font-size: 1.2em; /* Increase font size */
+    padding: 0.5em; /* Increase padding */
+    width: 200px; /* Set a fixed width or adjust as needed */
+}
+
 #grand-subtotal {
     font-weight: bold;
     color: #0066cc;
