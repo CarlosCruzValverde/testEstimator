@@ -6,11 +6,6 @@ function formatCurrency(value) {
     });
 }
 
-// Enhanced function to parse currency input (handles commas)
-function parseCurrencyInput(value) {
-    return parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
-}
-
 // Precise calculation helper (handles floating-point issues)
 function calculateWithTax(baseValue, percentage) {
     const baseInCents = Math.round(baseValue * 100);
@@ -28,69 +23,7 @@ let calculatedBaseCosts = {
 document.addEventListener('DOMContentLoaded', function() {
     loadEstimationData();
     setupEventListeners();
-    setupCurrencyInputs();
 });
-
-// Enhanced currency input formatting
-function setupCurrencyInputs() {
-    const currencyInputs = [
-        document.getElementById('total-submitted'),
-        document.getElementById('approved-amount')
-    ];
-    
-    currencyInputs.forEach(input => {
-        if (!input) return;
-        
-        // Initialize formatting
-        if (input.value) {
-            const num = parseCurrencyInput(input.value);
-            input.value = formatCurrency(num);
-        }
-        
-        input.addEventListener('input', function(e) {
-            const cursorPosition = this.selectionStart;
-            const originalValue = this.value;
-            let numericValue = this.value.replace(/[^0-9.]/g, '');
-            
-            // Handle multiple decimal points
-            if ((numericValue.match(/\./g) || []).length > 1) {
-                numericValue = numericValue.substring(0, numericValue.lastIndexOf('.'));
-            }
-            
-            // Format the number
-            const num = parseCurrencyInput(numericValue);
-            const formatted = formatCurrency(num);
-            
-            // Only update if changed to prevent cursor jumps
-            if (this.value !== formatted) {
-                this.value = formatted;
-                const newCursorPos = Math.max(
-                    0,
-                    cursorPosition + (formatted.length - originalValue.length)
-                );
-                this.setSelectionRange(newCursorPos, newCursorPos);
-            }
-            
-            calculateAllTotals();
-        });
-        
-        input.addEventListener('blur', function() {
-            const num = parseCurrencyInput(this.value);
-            this.value = formatCurrency(num);
-        });
-        
-        input.addEventListener('focus', function() {
-            // Select all but keep $ visible if you want
-            this.setSelectionRange(0, this.value.length);
-        });
-        
-        // Ensure proper formatting on page load
-        setTimeout(() => {
-            const num = parseCurrencyInput(input.value);
-            input.value = formatCurrency(num);
-        }, 100);
-    });
-}
 
 function loadEstimationData() {
     const projectId = document.getElementById('projectId').value;
@@ -292,7 +225,7 @@ function calculatePricePerCharger(grandTotal1) {
 
 function calculatePricePerChargerFromSubmitted() {
     const chargersCount = parseInt(document.getElementById('chargers-count').textContent) || 0;
-    const totalSubmitted = parseCurrencyInput(document.getElementById('total-submitted').value);
+    const totalSubmitted = parseFloat(document.getElementById('total-submitted').value) || 0;
     const lowVoltageBaseCost = parseFloat(
         document.getElementById('low-voltage-base-cost').textContent.replace(/[^0-9.-]/g, '')
     ) || 0;
