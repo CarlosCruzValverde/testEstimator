@@ -292,7 +292,7 @@ function calculatePricePerCharger(grandTotal1) {
 
 function calculatePricePerChargerFromSubmitted() {
     const chargersCount = parseInt(document.getElementById('chargers-count').textContent) || 0;
-    const totalSubmitted = parseFloat(document.getElementById('total-submitted').value) || 0;
+    const totalSubmitted = parseCurrencyInput(document.getElementById('total-submitted').value);
     const lowVoltageBaseCost = parseFloat(
         document.getElementById('low-voltage-base-cost').textContent.replace(/[^0-9.-]/g, '')
     ) || 0;
