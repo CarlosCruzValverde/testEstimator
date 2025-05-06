@@ -6,6 +6,43 @@ function formatCurrency(value) {
     });
 }
 
+// Format input as currency while typing
+function formatInputAsCurrency(input) {
+    // Store cursor position
+    let cursorPosition = input.selectionStart;
+    let originalLength = input.value.length;
+    
+    // Get value and remove all non-digit characters except decimal point
+    let value = input.value.replace(/[^\d.]/g, '');
+    
+    // If empty, set to 0
+    if (value === '') {
+        value = '0';
+    }
+    
+    // Parse as float
+    let number = parseFloat(value);
+    
+    // If not a valid number, set to 0
+    if (isNaN(number)) {
+        number = 0;
+    }
+    
+    // Format with commas and 2 decimal places
+    input.value = number.toLocaleString('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+    
+    // Adjust cursor position
+    let newLength = input.value.length;
+    cursorPosition = cursorPosition + (newLength - originalLength);
+    input.setSelectionRange(cursorPosition, cursorPosition);
+    
+    return number; // Return the numeric value
+}
+
 // Precise calculation helper (handles floating-point issues)
 function calculateWithTax(baseValue, percentage) {
     // Convert to cents (integers) to avoid floating-point errors
@@ -24,14 +61,41 @@ let calculatedBaseCosts = {
     equipment: 0
 };
 
-
 document.addEventListener('DOMContentLoaded', function () {
     // Load existing data from previous estimations
     loadEstimationData();
 
     // Set up event listeners
     setupEventListeners();
+    
+    // Set up currency input formatting
+    setupCurrencyInputs();
 });
+
+function setupCurrencyInputs() {
+    const currencyInputs = [
+        document.getElementById('total-submitted'),
+        document.getElementById('approved-amount')
+    ];
+    
+    currencyInputs.forEach(input => {
+        if (!input) return;
+        
+        input.addEventListener('input', function(e) {
+            formatInputAsCurrency(this);
+            calculateAllTotals();
+        });
+        
+        input.addEventListener('blur', function() {
+            formatInputAsCurrency(this);
+        });
+        
+        // Initial format if value exists
+        if (input.value) {
+            formatInputAsCurrency(input);
+        }
+    });
+}
 
 function loadEstimationData() {
     const projectId = document.getElementById('projectId').value;
