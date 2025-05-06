@@ -6,52 +6,16 @@ function formatCurrency(value) {
     });
 }
 
-// Format input as currency while typing
-function formatInputAsCurrency(input) {
-    // Store cursor position
-    let cursorPosition = input.selectionStart;
-    let originalLength = input.value.length;
-    
-    // Get value and remove all non-digit characters except decimal point
-    let value = input.value.replace(/[^\d.]/g, '');
-    
-    // If empty, set to 0
-    if (value === '') {
-        value = '0';
-    }
-    
-    // Parse as float
-    let number = parseFloat(value);
-    
-    // If not a valid number, set to 0
-    if (isNaN(number)) {
-        number = 0;
-    }
-    
-    // Format with commas and 2 decimal places
-    input.value = number.toLocaleString('en-US', {
-        style: 'decimal',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-    
-    // Adjust cursor position
-    let newLength = input.value.length;
-    cursorPosition = cursorPosition + (newLength - originalLength);
-    input.setSelectionRange(cursorPosition, cursorPosition);
-    
-    return number; // Return the numeric value
+// Enhanced function to parse currency input (handles commas)
+function parseCurrencyInput(value) {
+    return parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
 }
 
 // Precise calculation helper (handles floating-point issues)
 function calculateWithTax(baseValue, percentage) {
-    // Convert to cents (integers) to avoid floating-point errors
     const baseInCents = Math.round(baseValue * 100);
     const taxInCents = Math.round(baseInCents * (percentage || 0) / 100);
-    const totalInCents = baseInCents + taxInCents;
-
-    // Convert back to dollars
-    return totalInCents / 100;
+    return (baseInCents + taxInCents) / 100;
 }
 
 let calculatedBaseCosts = {
@@ -61,17 +25,13 @@ let calculatedBaseCosts = {
     equipment: 0
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Load existing data from previous estimations
+document.addEventListener('DOMContentLoaded', function() {
     loadEstimationData();
-
-    // Set up event listeners
     setupEventListeners();
-    
-    // Set up currency input formatting
     setupCurrencyInputs();
 });
 
+// Enhanced currency input formatting
 function setupCurrencyInputs() {
     const currencyInputs = [
         document.getElementById('total-submitted'),
@@ -81,19 +41,54 @@ function setupCurrencyInputs() {
     currencyInputs.forEach(input => {
         if (!input) return;
         
+        // Initialize formatting
+        if (input.value) {
+            const num = parseCurrencyInput(input.value);
+            input.value = formatCurrency(num);
+        }
+        
         input.addEventListener('input', function(e) {
-            formatInputAsCurrency(this);
+            const cursorPosition = this.selectionStart;
+            const originalValue = this.value;
+            let numericValue = this.value.replace(/[^0-9.]/g, '');
+            
+            // Handle multiple decimal points
+            if ((numericValue.match(/\./g) || []).length > 1) {
+                numericValue = numericValue.substring(0, numericValue.lastIndexOf('.'));
+            }
+            
+            // Format the number
+            const num = parseCurrencyInput(numericValue);
+            const formatted = formatCurrency(num);
+            
+            // Only update if changed to prevent cursor jumps
+            if (this.value !== formatted) {
+                this.value = formatted;
+                const newCursorPos = Math.max(
+                    0,
+                    cursorPosition + (formatted.length - originalValue.length)
+                );
+                this.setSelectionRange(newCursorPos, newCursorPos);
+            }
+            
             calculateAllTotals();
         });
         
         input.addEventListener('blur', function() {
-            formatInputAsCurrency(this);
+            const num = parseCurrencyInput(this.value);
+            this.value = formatCurrency(num);
         });
         
-        // Initial format if value exists
-        if (input.value) {
-            formatInputAsCurrency(input);
-        }
+        input.addEventListener('focus', function() {
+            // Select all but keep $ visible if you want
+            this.setSelectionRange(0, this.value.length);
+        });
+        
+        // Ensure proper formatting on page load
+        setTimeout(() => {
+            const num = parseCurrencyInput(input.value);
+            input.value = formatCurrency(num);
+        }, 100);
     });
 }
 
