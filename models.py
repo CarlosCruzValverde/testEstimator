@@ -225,3 +225,140 @@ class ProjectSummary(db.Model):
 
     # Foreign key to Project
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id', ondelete="CASCADE"), nullable=False, index=True)
+
+
+class MaterialSupplier(db.Model):
+    __tablename__ = "material_suppliers"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)  # e.g., "J & S", "The Home Depot"
+    created_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'))
+    updated_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'), onupdate=text('now()'))
+    
+    # Relationships
+    wire_prices = db.relationship('WirePrice', backref='supplier', lazy='dynamic')
+    conduit_prices = db.relationship('ConduitPrice', backref='supplier', lazy='dynamic')
+
+
+class WirePrice(db.Model):
+    __tablename__ = "wire_prices"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    awg = db.Column(db.String(20), nullable=False)  # e.g., "10", "8", "4/0", "250 MCM"
+    price_per_foot = db.Column(db.Float, nullable=False)
+    updated_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'), onupdate=text('now()'))
+    
+    # Foreign key to Supplier
+    supplier_id = db.Column(db.Integer, db.ForeignKey('material_suppliers.id', ondelete="CASCADE"), nullable=False, index=True)
+    
+    # Ensure unique combination of supplier and AWG
+    __table_args__ = (
+        db.UniqueConstraint('supplier_id', 'awg', name='_supplier_awg_uc'),
+    )
+
+
+class ConduitPrice(db.Model):
+    __tablename__ = "conduit_prices"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    size = db.Column(db.String(20), nullable=False)  # e.g., "3/4''", "1''", "2'' Rigid"
+    price_per_foot = db.Column(db.Float, nullable=False)
+    updated_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'), onupdate=text('now()'))
+    
+    # Foreign key to Supplier
+    supplier_id = db.Column(db.Integer, db.ForeignKey('material_suppliers.id', ondelete="CASCADE"), nullable=False, index=True)
+    
+    # Ensure unique combination of supplier and size
+    __table_args__ = (
+        db.UniqueConstraint('supplier_id', 'size', name='_supplier_size_uc'),
+    )
+
+
+class ConstructionMaterial(db.Model):
+    __tablename__ = 'construction_materials'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    created_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'))
+    updated_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'), onupdate=text('now()'))
+    
+    # Updated relationship with explicit order_by and lazy loading options
+    prices = db.relationship(
+        'ConstructionPrice', 
+        backref='material', 
+        lazy='dynamic',
+        order_by='desc(ConstructionPrice.created_at)'
+    )
+
+class ConstructionPrice(db.Model):
+    __tablename__ = 'construction_prices'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    material_id = db.Column(db.Integer, db.ForeignKey('construction_materials.id'), nullable=False)
+    price = db.Column(db.Float, nullable=False)  # price per unit
+    created_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'))
+    updated_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'), onupdate=text('now()'))
+    
+
+class Union(db.Model):
+    __tablename__ = 'unions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'))
+    updated_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'), onupdate=text('now()'))
+    
+    # Updated relationships with proper loading options
+    positions = db.relationship(
+        'UnionPosition', 
+        back_populates='union',
+        lazy='select',  # Changed from 'dynamic' to allow eager loading
+        order_by='UnionPosition.name'
+    )
+    
+    wage_rates = db.relationship(
+        'UnionWageRate',
+        back_populates='union',
+        lazy='dynamic'  # Keep dynamic for wage rates as we may want to query them
+    )
+
+class UnionPosition(db.Model):
+    __tablename__ = 'union_positions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    is_apprentice = db.Column(db.Boolean, default=False)
+    apprentice_year = db.Column(db.Integer, nullable=True)
+    created_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'))
+    updated_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'), onupdate=text('now()'))
+    union_id = db.Column(db.Integer, db.ForeignKey('unions.id'), nullable=False)
+    
+    # Updated relationships
+    union = db.relationship('Union', back_populates='positions')
+    
+    wage_rates = db.relationship(
+        'UnionWageRate',
+        back_populates='position',
+        lazy='dynamic',
+        order_by='desc(UnionWageRate.effective_date)'
+    )
+
+class UnionWageRate(db.Model):
+    __tablename__ = 'union_wage_rates'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    union_id = db.Column(db.Integer, db.ForeignKey('unions.id'), nullable=False)
+    position_id = db.Column(db.Integer, db.ForeignKey('union_positions.id'), nullable=False)
+    base_rate = db.Column(db.Float, nullable=False)  # Hourly rate
+    effective_date = db.Column(db.Date, nullable=False)
+    created_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'))
+    updated_at = db.Column(TIMESTAMP, nullable=False, server_default=text('now()'), onupdate=text('now()'))
+    
+    # Relationships 
+    union = db.relationship('Union', back_populates='wage_rates')
+    position = db.relationship('UnionPosition', back_populates='wage_rates')
+    
+    __table_args__ = (
+        db.UniqueConstraint('union_id', 'position_id', 'effective_date', 
+                          name='_union_position_date_uc'),
+    )

@@ -10,7 +10,7 @@ from auth import login_required
 from flask import Flask, request, jsonify
 from sqlalchemy.orm import joinedload
 from flask import current_app
-from models import CostEstimation, Project, EstimationEntry, MiscEquipmentEstimation, MiscEquipmentEntry, LaborCostEstimation, LaborCostEntry, ProjectSummary
+from models import CostEstimation, Project, EstimationEntry, MiscEquipmentEstimation, MiscEquipmentEntry, LaborCostEstimation, LaborCostEntry, ProjectSummary, MaterialSupplier, WirePrice, ConduitPrice, ConstructionMaterial, ConstructionPrice, Union, UnionWageRate
 from database import db
 from datetime import datetime
 
@@ -1330,3 +1330,320 @@ def delete_project(project_id):
         flash(f"Error deleting project: {str(e)}", "danger")
     
     return redirect(url_for('portfolio.projects'))
+
+
+
+@bp.route("/portfolio/material_prices", methods=["GET"])
+@login_required
+def material_prices():
+    """Render the material prices management page"""
+    suppliers = MaterialSupplier.query.order_by(MaterialSupplier.name).all()
+    construction_materials = ConstructionMaterial.query.order_by(ConstructionMaterial.name).all()
+    
+    # Preload latest prices for materials
+    for material in construction_materials:
+        material.latest_price = db.session.query(ConstructionPrice).filter_by(
+            material_id=material.id
+        ).order_by(ConstructionPrice.created_at.desc()).first()
+    
+    # Load unions with their positions and LATEST wage rates
+    unions = Union.query.options(
+        db.joinedload(Union.positions)
+    ).order_by(Union.name).all()
+
+    processed_unions = []
+    for union in unions:
+        union_data = {
+            'id': union.id,
+            'name': union.name,
+            'positions': []
+        }
+
+        for position in union.positions:
+            # Get the most recent wage rate for this position
+            latest_rate = db.session.query(UnionWageRate).filter_by(
+                position_id=position.id
+            ).order_by(UnionWageRate.effective_date.desc()).first()
+
+            union_data['positions'].append({
+                'id': position.id,
+                'name': position.name,
+                'is_apprentice': position.is_apprentice,
+                'apprentice_year': position.apprentice_year,
+                'rate': latest_rate.base_rate if latest_rate else None,
+                'effective_date': latest_rate.effective_date if latest_rate else None
+            })
+
+        processed_unions.append(union_data)
+    
+    return render_template(
+        "portfolio/material_prices.html",
+        suppliers=suppliers,
+        construction_materials=construction_materials,
+        unions=processed_unions
+    )
+
+
+def get_wire_price(supplier_id, awg):
+    """Helper function to get wire price for template"""
+    price = WirePrice.query.filter_by(supplier_id=supplier_id, awg=awg).first()
+    return price.price_per_foot if price else None
+
+def get_conduit_price(supplier_id, size):
+    """Helper function to get conduit price for template"""
+    price = ConduitPrice.query.filter_by(supplier_id=supplier_id, size=size).first()
+    return price.price_per_foot if price else None
+
+def get_supplier_wire_update(supplier_id):
+    """Helper function to get latest wire update time for template"""
+    latest = db.session.query(
+        db.func.to_char(db.func.max(WirePrice.updated_at), 'YYYY-MM-DD HH24:MI:SS')
+    ).filter_by(supplier_id=supplier_id).scalar()
+    return latest or "Never"
+
+def get_supplier_conduit_update(supplier_id):
+    """Helper function to get latest conduit update time for template"""
+    latest = db.session.query(
+        db.func.to_char(db.func.max(ConduitPrice.updated_at), 'YYYY-MM-DD HH24:MI:SS')
+    ).filter_by(supplier_id=supplier_id).scalar()
+    return latest or "Never"
+
+
+@bp.route("/portfolio/api/wire_prices", methods=["GET", "POST"])
+@login_required
+def wire_prices_api():
+    """API endpoint for wire prices"""
+    if request.method == "POST":
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({"success": False, "message": "No data provided"}), 400
+            
+            for supplier_id, prices in data.items():
+                supplier = MaterialSupplier.query.get(supplier_id)
+                if not supplier:
+                    continue
+                
+                for awg, price in prices.items():
+                    if price is None:
+                        continue
+                        
+                    # Find existing price or create new
+                    wire_price = WirePrice.query.filter_by(
+                        supplier_id=supplier_id,
+                        awg=awg
+                    ).first()
+                    
+                    if wire_price:
+                        wire_price.price_per_foot = price
+                    else:
+                        wire_price = WirePrice(
+                            supplier_id=supplier_id,
+                            awg=awg,
+                            price_per_foot=price
+                        )
+                        db.session.add(wire_price)
+            
+            db.session.commit()
+            return jsonify({"success": True, "message": "Wire prices updated successfully"})
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error updating wire prices: {str(e)}")
+            return jsonify({"success": False, "message": f"Error updating prices: {str(e)}"}), 500
+    
+    # GET request - return all wire prices
+    suppliers = MaterialSupplier.query.order_by(MaterialSupplier.name).all()
+    result = {}
+    
+    for supplier in suppliers:
+        result[supplier.id] = {
+            "name": supplier.name,
+            "prices": {price.awg: price.price_per_foot for price in supplier.wire_prices},
+            "updated_at": max([price.updated_at for price in supplier.wire_prices], default=None)
+        }
+    
+    return jsonify(result)
+
+@bp.route("/portfolio/api/conduit_prices", methods=["GET", "POST"])
+@login_required
+def conduit_prices_api():
+    """API endpoint for conduit prices"""
+    if request.method == "POST":
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({"success": False, "message": "No data provided"}), 400
+            
+            for supplier_id, prices in data.items():
+                supplier = MaterialSupplier.query.get(supplier_id)
+                if not supplier:
+                    continue
+                
+                for size, price in prices.items():
+                    if price is None:
+                        continue
+                        
+                    # Find existing price or create new
+                    conduit_price = ConduitPrice.query.filter_by(
+                        supplier_id=supplier_id,
+                        size=size
+                    ).first()
+                    
+                    if conduit_price:
+                        conduit_price.price_per_foot = price
+                    else:
+                        conduit_price = ConduitPrice(
+                            supplier_id=supplier_id,
+                            size=size,
+                            price_per_foot=price
+                        )
+                        db.session.add(conduit_price)
+            
+            db.session.commit()
+            return jsonify({"success": True, "message": "Conduit prices updated successfully"})
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error updating conduit prices: {str(e)}")
+            return jsonify({"success": False, "message": f"Error updating prices: {str(e)}"}), 500
+    
+    # GET request - return all conduit prices
+    suppliers = MaterialSupplier.query.order_by(MaterialSupplier.name).all()
+    result = {}
+    
+    for supplier in suppliers:
+        result[supplier.id] = {
+            "name": supplier.name,
+            "prices": {price.size: price.price_per_foot for price in supplier.conduit_prices},
+            "updated_at": max([price.updated_at for price in supplier.conduit_prices], default=None)
+        }
+    
+    return jsonify(result)
+
+
+@bp.route("/portfolio/api/construction_prices", methods=["GET", "POST"])
+@login_required
+def construction_prices_api():
+    """API endpoint for construction material prices"""
+    if request.method == "POST":
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({"success": False, "message": "No data provided"}), 400
+            
+            for material_id, price in data.items():
+                material = ConstructionMaterial.query.get(material_id)
+                if not material:
+                    continue
+                
+                if price is None:
+                    continue
+                    
+                # Create a new price record (maintaining history)
+                new_price = ConstructionPrice(
+                    material_id=material_id,
+                    price=price
+                )
+                db.session.add(new_price)
+            
+            db.session.commit()
+            return jsonify({"success": True, "message": "Construction prices updated successfully"})
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error updating construction prices: {str(e)}")
+            return jsonify({"success": False, "message": f"Error updating prices: {str(e)}"}), 500
+    
+    # GET request - return all construction materials with their latest prices
+    materials = ConstructionMaterial.query.options(
+        db.joinedload(ConstructionMaterial.prices)
+    ).order_by(ConstructionMaterial.name).all()
+    
+    result = {}
+    for material in materials:
+        latest_price = material.prices.order_by(ConstructionPrice.created_at.desc()).first()
+        result[material.id] = {
+            "name": material.name,
+            "price": latest_price.price if latest_price else None,
+            "updated_at": latest_price.updated_at if latest_price else None
+        }
+    
+    return jsonify(result)
+
+@bp.route("/portfolio/api/construction_price_history/<int:material_id>", methods=["GET"])
+@login_required
+def construction_price_history(material_id):
+    """Get price history for a construction material"""
+    material = ConstructionMaterial.query.get_or_404(material_id)
+    prices = material.prices.order_by(ConstructionPrice.created_at.desc()).all()
+    
+    return jsonify({
+        "material": material.name,
+        "prices": [{
+            "price": price.price,
+            "created_at": price.created_at.isoformat(),
+            "updated_at": price.updated_at.isoformat()
+        } for price in prices]
+    })
+
+
+@bp.route("/portfolio/api/union_rates", methods=["POST"])
+@login_required
+def union_rates_api():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+
+        for union_id, positions in data.items():
+            # Validate union exists
+            if not Union.query.get(union_id):
+                current_app.logger.warning(f"Union not found: {union_id}")
+                continue
+
+            for position_id, rate_data in positions.items():
+                try:
+                    # Validate required fields
+                    if not rate_data or 'rate' not in rate_data or 'effective_date' not in rate_data:
+                        current_app.logger.warning(f"Missing fields in position {position_id}")
+                        continue
+
+                    # Parse and validate date
+                    try:
+                        effective_date = datetime.strptime(rate_data['effective_date'], '%Y-%m-%d').date()
+                    except ValueError:
+                        return jsonify({
+                            "success": False,
+                            "message": f"Invalid date format for position {position_id}. Use YYYY-MM-DD"
+                        }), 400
+
+                    # Find or create rate
+                    rate = UnionWageRate.query.filter_by(
+                        union_id=union_id,
+                        position_id=position_id,
+                        effective_date=effective_date
+                    ).first()
+
+                    if rate:
+                        rate.base_rate = float(rate_data['rate'])
+                    else:
+                        rate = UnionWageRate(
+                            union_id=int(union_id),
+                            position_id=int(position_id),
+                            base_rate=float(rate_data['rate']),
+                            effective_date=effective_date
+                        )
+                        db.session.add(rate)
+
+                except (ValueError, KeyError) as e:
+                    current_app.logger.error(f"Error processing position {position_id}: {str(e)}")
+                    continue
+
+        db.session.commit()
+        return jsonify({"success": True, "message": "Union rates updated successfully"})
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error updating union rates: {str(e)}", exc_info=True)
+        return jsonify({"success": False, "message": str(e)}), 500

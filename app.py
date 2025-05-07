@@ -44,6 +44,32 @@ def currency_format(value):
 # Register the filter
 app.jinja_env.filters['currency'] = currency_format
 
+# Add template helpers
+@app.template_filter('format_datetime')
+def format_datetime(value):
+    """Format datetime for display"""
+    if value is None:
+        return "Never"
+    return value.strftime('%Y-%m-%d %H:%M:%S')
+
+# Template helpers
+from portfolio import (
+    get_wire_price,
+    get_conduit_price,
+    get_supplier_wire_update,
+    get_supplier_conduit_update
+)
+
+@app.context_processor
+def utility_processor():
+    """Make these functions available to all templates"""
+    return {
+        'get_wire_price': get_wire_price,
+        'get_conduit_price': get_conduit_price,
+        'get_supplier_wire_update': get_supplier_wire_update,
+        'get_supplier_conduit_update': get_supplier_conduit_update
+    }
+
 @app.teardown_appcontext
 def teardown_db(exception):
     db.session.remove()
