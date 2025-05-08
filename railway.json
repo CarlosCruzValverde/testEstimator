@@ -1,0 +1,8 @@
+{
+    "build": {
+        "command": "pip install -r requirements.txt"
+    },
+    "deploy": {
+        "postdeploy": "flask db upgrade && python scripts/database_seeder.py"
+    }
+}
