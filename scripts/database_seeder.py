@@ -34,27 +34,27 @@ def populate_wire_prices():
     wire_prices = {
         # J & S prices (wholesale electrical supplier)
         "J & S": {
-            '10': 0.28,    # 10 AWG
-            '8': 0.52,     # 8 AWG
-            '6': 0.85,     # 6 AWG
-            '4': 1.40,     # 4 AWG
-            '3/0': 2.75,   # 3/0 AWG
-            '4/0': 3.45,   # 4/0 AWG
-            '250 MCM': 4.75,  # 250 MCM
-            '350 MCM': 6.20,  # 350 MCM
-            '600 MCM': 9.80   # 600 MCM
+            '10': 130,    # 10 AWG
+            '8': 300,     # 8 AWG
+            '6': 400,     # 6 AWG
+            '4': 750,     # 4 AWG
+            '3/0': 4.80,   # 3/0 AWG
+            '4/0': 5.50,   # 4/0 AWG
+            '250 MCM': 7.50,  # 250 MCM
+            '350 MCM': 11,  # 350 MCM
+            '600 MCM': 21   # 600 MCM
         },
         # The Home Depot prices (retail)
         "The Home Depot": {
-            '10': 0.35,    # 10 AWG
-            '8': 0.65,     # 8 AWG
-            '6': 1.05,     # 6 AWG
-            '4': 1.75,     # 4 AWG
-            '3/0': 3.25,   # 3/0 AWG
+            '10': 186,    # 10 AWG
+            '8': 369,     # 8 AWG
+            '6': 565,     # 6 AWG
+            '4': 0,     # 4 AWG
+            '3/0': 6.58,   # 3/0 AWG
             '4/0': 4.10,   # 4/0 AWG
-            '250 MCM': 5.50,  # 250 MCM
-            '350 MCM': 7.25,  # 350 MCM
-            '600 MCM': 11.00  # 600 MCM
+            '250 MCM': 0,  # 250 MCM
+            '350 MCM': 9.84,  # 350 MCM
+            '600 MCM': 0  # 600 MCM
         }
     }
 
@@ -88,29 +88,29 @@ def populate_conduit_prices():
     conduit_prices = {
         # J & S prices (wholesale electrical supplier)
         "J & S": {
-            '3/4"': 0.38,
-            '1"': 0.55,
-            '1 1/4"': 0.80,
-            '1 1/2"': 0.98,
-            '2"': 1.50,
-            '3"': 2.40,
-            '2" Rigid': 2.75,
-            '2 1/2 EMT': 1.85,
-            '3" Rigid': 3.95,
-            '4" Rigid': 5.45
+            '3/4"': 10,
+            '1"': 17,
+            '1 1/4"': 28,
+            '1 1/2"': 38,
+            '2"': 42,
+            '3"': 95,
+            '2" Rigid': 75,
+            '2 1/2 EMT': 48,
+            '3" Rigid': 160,
+            '4" Rigid': 210
         },
         # The Home Depot prices (retail)
         "The Home Depot": {
-            '3/4"': 0.45,
-            '1"': 0.65,
-            '1 1/4"': 0.95,
-            '1 1/2"': 1.15,
-            '2"': 1.75,
-            '3"': 2.85,
-            '2" Rigid': 3.25,
-            '2 1/2 EMT': 2.10,
-            '3" Rigid': 4.50,
-            '4" Rigid': 6.25
+            '3/4"': 11.26,
+            '1"': 19.48,
+            '1 1/4"': 32,
+            '1 1/2"': 37.80,
+            '2"': 44.88,
+            '3"': 98,
+            '2" Rigid': 78,
+            '2 1/2 EMT': 50,
+            '3" Rigid': 164,
+            '4" Rigid': 220
         }
     }
 
@@ -137,15 +137,15 @@ def populate_conduit_prices():
 def populate_construction_materials():
     """Populate construction materials and prices"""
     materials = [
-        ("Concrete Pad 5' 1/2'' x 30'' x 5''", 250.00),
-        ("Concrete Pad 5' x 7' x 5''", 350.00),
-        ("Concrete Footings 24'' x 24'' x 12''", 180.00),
-        ("Direct Bury Bollards", 120.00),
-        ("Core Drilling Fee", 300.00),
-        ("Portable Restroom (30 Days)", 200.00),
-        ("Signage", 75.00),
-        ("X-Rays", 500.00),
-        ("Crane Service (4 Hours)", 1200.00)
+        ("Concrete Pad 5' 1/2'' x 30'' x 5''", 1200.00),
+        ("Concrete Pad 5' x 7' x 5''", 1500.00),
+        ("Concrete Footings 24'' x 24'' x 12''", 700.00),
+        ("Direct Bury Bollards", 700.00),
+        ("Core Drilling Fee", 650.00),
+        ("Portable Restroom (30 Days)", 500.00),
+        ("Signage", 500.00),
+        ("X-Rays", 2500.00),
+        ("Crane Service (4 Hours)", 1500.00)
     ]
 
     for name, price in materials:
@@ -180,14 +180,14 @@ def populate_unions_and_positions():
                 {"name": "Apprentice 5th Year", "is_apprentice": True, "year": 5}
             ],
             "wage_rates": {
-                "Project Manager": 75.00,
-                "Foreman": 65.00,
-                "Journeyman": 55.00,
-                "Apprentice 1st Year": 25.00,
-                "Apprentice 2nd Year": 30.00,
-                "Apprentice 3rd Year": 35.00,
-                "Apprentice 4th Year": 40.00,
-                "Apprentice 5th Year": 45.00
+                "Project Manager": 50.00,
+                "Foreman": 93.00,
+                "Journeyman": 86.00,
+                "Apprentice 1st Year": 35.00,
+                "Apprentice 2nd Year": 42.00,
+                "Apprentice 3rd Year": 48.00,
+                "Apprentice 4th Year": 55.00,
+                "Apprentice 5th Year": 65.00
             }
         },
         {
@@ -203,14 +203,14 @@ def populate_unions_and_positions():
                 {"name": "Apprentice 5th Year", "is_apprentice": True, "year": 5}
             ],
             "wage_rates": {
-                "Project Manager": 80.00,
-                "Foreman": 70.00,
-                "Journeyman": 60.00,
-                "Apprentice 1st Year": 28.00,
-                "Apprentice 2nd Year": 33.00,
-                "Apprentice 3rd Year": 38.00,
-                "Apprentice 4th Year": 43.00,
-                "Apprentice 5th Year": 48.00
+                "Project Manager": 50.00,
+                "Foreman": 110.00,
+                "Journeyman": 105.00,
+                "Apprentice 1st Year": 48.00,
+                "Apprentice 2nd Year": 55.00,
+                "Apprentice 3rd Year": 61.00,
+                "Apprentice 4th Year": 68.00,
+                "Apprentice 5th Year": 78.00
             }
         }
     ]
