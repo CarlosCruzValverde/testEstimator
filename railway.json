@@ -1,8 +1,8 @@
 {
     "build": {
-        "command": "pip install -r requirements.txt"
+        "command": "pip install -r requirements.txt && chmod +x scripts/database_seeder.py"
     },
     "deploy": {
-        "postdeploy": "flask db upgrade && python -c 'import time; time.sleep(5)' && python scripts/database_seeder.py"
+        "postdeploy": "flask db upgrade && sleep 15 && python -m scripts.database_seeder"
     }
 }

@@ -9,6 +9,14 @@ from models import (
     Union, UnionPosition, UnionWageRate, 
 )
 
+# Add this right after your imports
+print("🐍 Python path:")
+import sys
+print("\n".join(sys.path))
+
+print(f"Current working directory: {os.getcwd()}")
+print(f"Script directory contents: {os.listdir('scripts')}")
+
 def populate_suppliers():
     """Populate material suppliers - only J & S and The Home Depot"""
     suppliers = [
