@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Initialize if needed
 if [ ! -d "migrations" ]; then
     flask db init
@@ -14,6 +15,9 @@ flask db upgrade
 
 # Fallback: Create tables directly if migrations failed
 flask init-db
+
+# Run the database seeder
+python scripts/database_seeder.py
 
 # Start app
 gunicorn -c gunicorn_config.py wsgi:app
