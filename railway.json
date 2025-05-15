@@ -3,6 +3,6 @@
         "command": "pip install -r requirements.txt && chmod +x scripts/database_seeder.py"
     },
     "deploy": {
-        "postdeploy": "flask db upgrade && sleep 15 && python -m scripts.database_seeder"
+        "postdeploy": "flask db upgrade && sleep 30 && python scripts/database_seeder.py"
     }
 }
