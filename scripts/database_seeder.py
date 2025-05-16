@@ -2,7 +2,7 @@
 
 import os
 from datetime import date
-from app import app, db  # Changed from create_app to app
+from app import app, db  # This imports from app.py
 from models import (
     MaterialSupplier, WirePrice, ConduitPrice, 
     ConstructionMaterial, ConstructionPrice,

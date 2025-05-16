@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Add current directory to Python path
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+
 # Initialize if needed
 if [ ! -d "migrations" ]; then
     flask db init
